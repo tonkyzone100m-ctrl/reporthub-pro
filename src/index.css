@@ -1,111 +1,474 @@
+/* =========================================================
+   ReportHub — Global Styles
+   ========================================================= */
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --rh-primary: #0d6efd;
+  --rh-primary-dark: #0b5ed7;
+  --rh-primary-soft: #eaf3ff;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  --rh-text: #212529;
+  --rh-text-muted: #6c757d;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
+  --rh-background: #ffffff;
+  --rh-surface: #f8f9fa;
+  --rh-border: #dee2e6;
+
+  --rh-success: #198754;
+  --rh-warning: #ffc107;
+  --rh-danger: #dc3545;
+
+  --rh-radius: 12px;
+  --rh-radius-lg: 16px;
+
+  --rh-shadow-sm:
+    0 2px 8px rgba(0, 0, 0, 0.06);
+
+  --rh-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.08);
+
+  --rh-shadow-lg:
+    0 16px 40px rgba(0, 0, 0, 0.1);
+
+  --rh-font:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  font-family: var(--rh-font);
+  color: var(--rh-text);
+  background: var(--rh-background);
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+/* =========================================================
+   Base
+   ========================================================= */
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+
+  font-family: var(--rh-font);
+  font-size: 16px;
+  line-height: 1.6;
+
+  color: var(--rh-text);
+  background: var(--rh-background);
 }
+
+#root {
+  min-height: 100vh;
+}
+
+/* =========================================================
+   Typography
+   ========================================================= */
 
 h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--rh-text);
+  font-weight: 700;
+  line-height: 1.2;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
 p {
-  margin: 0;
+  line-height: 1.7;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
+.text-secondary {
+  color: var(--rh-text-muted) !important;
+}
+
+/* =========================================================
+   Links
+   ========================================================= */
+
+a {
+  color: var(--rh-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--rh-primary-dark);
+}
+
+/* =========================================================
+   Buttons
+   ========================================================= */
+
+.btn {
+  border-radius: 8px;
+  font-weight: 600;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background-color: var(--rh-primary);
+  border-color: var(--rh-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--rh-primary-dark);
+  border-color: var(--rh-primary-dark);
+  box-shadow: 0 6px 16px rgba(13, 110, 253, 0.2);
+}
+
+.btn-outline-secondary {
+  color: var(--rh-text);
+  border-color: var(--rh-border);
+}
+
+.btn-outline-secondary:hover {
+  color: var(--rh-text);
+  background-color: var(--rh-surface);
+  border-color: #adb5bd;
+}
+
+/* =========================================================
+   Cards
+   ========================================================= */
+
+.card {
+  border-radius: var(--rh-radius);
+  border-color: var(--rh-border);
+}
+
+.card.shadow-sm {
+  box-shadow: var(--rh-shadow-sm) !important;
+}
+
+.card:hover {
+  box-shadow: var(--rh-shadow) !important;
+}
+
+/* =========================================================
+   Forms
+   ========================================================= */
+
+.form-label {
+  color: var(--rh-text);
+}
+
+.form-control,
+.form-select {
+  border-color: var(--rh-border);
+  border-radius: 8px;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--rh-primary);
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.12);
+}
+
+.form-control::placeholder {
+  color: #adb5bd;
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 140px;
+}
+
+/* =========================================================
+   ReportHub Hero
+   ========================================================= */
+
+.reporthub-hero {
+  background:
+    linear-gradient(
+      135deg,
+      #f8fbff 0%,
+      #ffffff 55%,
+      #f4f8ff 100%
+    );
+}
+
+.reporthub-hero h1 {
+  letter-spacing: -0.8px;
+}
+
+.reporthub-hero .lead {
+  max-width: 720px;
+}
+
+/* =========================================================
+   Feature Cards
+   ========================================================= */
+
+.reporthub-feature {
+  height: 100%;
+  padding: 1.5rem;
+  background: #ffffff;
+  border: 1px solid var(--rh-border);
+  border-radius: var(--rh-radius);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.reporthub-feature:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--rh-shadow);
+}
+
+/* =========================================================
+   Process Steps
+   ========================================================= */
+
+.reporthub-step-number {
+  width: 42px;
+  height: 42px;
+
+  flex: 0 0 42px;
+
   display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  color: #ffffff;
+  background-color: var(--rh-primary);
+
+  font-weight: 700;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+/* =========================================================
+   Status Indicators
+   ========================================================= */
+
+.reporthub-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  padding: 0.4rem 0.75rem;
+
+  border-radius: 999px;
+
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.reporthub-status-pending {
+  color: #856404;
+  background-color: #fff3cd;
+}
+
+.reporthub-status-review {
+  color: #055160;
+  background-color: #cff4fc;
+}
+
+.reporthub-status-action {
+  color: #084298;
+  background-color: #cfe2ff;
+}
+
+.reporthub-status-resolved {
+  color: #0f5132;
+  background-color: #d1e7dd;
+}
+
+/* =========================================================
+   Track Report Timeline
+   ========================================================= */
+
+.reporthub-timeline {
+  position: relative;
+}
+
+.reporthub-timeline-item {
+  position: relative;
+  padding-left: 2rem;
+  padding-bottom: 1.5rem;
+}
+
+.reporthub-timeline-item::before {
+  content: "";
+  position: absolute;
+
+  left: 7px;
+  top: 20px;
+  bottom: -2px;
+
+  width: 2px;
+
+  background-color: var(--rh-border);
+}
+
+.reporthub-timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.reporthub-timeline-item:last-child::before {
+  display: none;
+}
+
+.reporthub-timeline-dot {
+  position: absolute;
+
+  left: 0;
+  top: 4px;
+
+  width: 16px;
+  height: 16px;
+
+  border-radius: 50%;
+
+  background-color: #ffffff;
+  border: 3px solid var(--rh-border);
+}
+
+.reporthub-timeline-dot.active {
+  border-color: var(--rh-primary);
+  background-color: var(--rh-primary);
+}
+
+.reporthub-timeline-dot.completed {
+  border-color: var(--rh-success);
+  background-color: var(--rh-success);
+}
+
+/* =========================================================
+   Success Page
+   ========================================================= */
+
+.reporthub-success-icon {
+  width: 72px;
+  height: 72px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  color: var(--rh-success);
+  background-color: #d1e7dd;
+
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+/* =========================================================
+   Utility
+   ========================================================= */
+
+.reporthub-section {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+.reporthub-container {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* =========================================================
+   Responsive Design
+   ========================================================= */
+
+@media (max-width: 991.98px) {
+  .reporthub-section {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  body {
+    font-size: 15px;
+  }
+
+  h1 {
+    letter-spacing: -0.4px;
+  }
+
+  .reporthub-section {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .btn-lg {
+    width: 100%;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .card-body {
+    padding: 1.25rem !important;
+  }
+}
+
+/* =========================================================
+   Accessibility
+   ========================================================= */
+
+:focus-visible {
+  outline: 3px solid rgba(13, 110, 253, 0.35);
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   Reduced Motion
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
