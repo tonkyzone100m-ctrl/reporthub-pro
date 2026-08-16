@@ -1,9 +1,16 @@
-import { BrowserRouter, Route, Routes, Link } from 'react-router-dom'
+import {
+  BrowserRouter,
+  Route,
+  Routes,
+  Link,
+} from 'react-router-dom'
 
 import MainLayout from './layouts/MainLayout'
 import Home from './pages/Home'
 import Report from './pages/Report'
 import Track from './pages/Track'
+import About from './pages/About'
+import Contact from './pages/Contact'
 
 function NotFound() {
   return (
@@ -54,6 +61,15 @@ function App() {
           <Route
             path="/track"
             element={<Track />}
+          />
+
+          <Route
+            path="/about"
+            element={<About />}
+          />
+          <Route 
+          path="/contact"
+          element={<Contact />}
           />
 
           <Route

@@ -27,12 +27,15 @@ function Navbar() {
           className="collapse navbar-collapse"
           id="reportHubNavbar"
         >
-          <ul className="navbar-nav ms-auto align-items-lg-center">
+          <ul className="navbar-nav ms-auto align-items-lg-center gap-lg-1">
             <li className="nav-item">
               <NavLink
                 to="/"
+                end
                 className={({ isActive }) =>
-                  `nav-link ${isActive ? 'active fw-semibold' : ''}`
+                  `nav-link ${
+                    isActive ? 'active fw-semibold' : ''
+                  }`
                 }
               >
                 Home
@@ -43,7 +46,9 @@ function Navbar() {
               <NavLink
                 to="/report"
                 className={({ isActive }) =>
-                  `nav-link ${isActive ? 'active fw-semibold' : ''}`
+                  `nav-link ${
+                    isActive ? 'active fw-semibold' : ''
+                  }`
                 }
               >
                 Report an Issue
@@ -54,10 +59,47 @@ function Navbar() {
               <NavLink
                 to="/track"
                 className={({ isActive }) =>
-                  `nav-link ${isActive ? 'active fw-semibold' : ''}`
+                  `nav-link ${
+                    isActive ? 'active fw-semibold' : ''
+                  }`
                 }
               >
                 Track Report
+              </NavLink>
+            </li>
+
+            <li className="nav-item">
+              <NavLink
+                to="/about"
+                className={({ isActive }) =>
+                  `nav-link ${
+                    isActive ? 'active fw-semibold' : ''
+                  }`
+                }
+              >
+                About
+              </NavLink>
+            </li>
+
+            <li className="nav-item">
+              <NavLink
+                to="/contact"
+                className={({ isActive }) =>
+                  `nav-link ${
+                    isActive ? 'active fw-semibold' : ''
+                  }`
+                }
+              >
+                Contact
+              </NavLink>
+            </li>
+
+            <li className="nav-item ms-lg-2 mt-2 mt-lg-0">
+              <NavLink
+                to="/report"
+                className="btn btn-primary px-3"
+              >
+                Report an Issue
               </NavLink>
             </li>
           </ul>

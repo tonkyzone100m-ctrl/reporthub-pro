@@ -1,72 +1,55 @@
-import {
-  useEffect,
-  useState,
-} from 'react'
-
-import type { FormEvent } from 'react'
-
-import { useSearchParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 
 import { getReportByReference } from '../services/reportService'
 
-import type {
-  Report,
-  ReportStatus,
-} from '../types/report'
+type ReportStatus =
+  | 'submitted'
+  | 'under-review'
+  | 'in-progress'
+  | 'resolved'
 
-type StatusStep = {
-  status: ReportStatus
-  title: string
+type TrackedReport = {
+  reference: string
+  category: string
   description: string
+  location: string
+  latitude: number | null
+  longitude: number | null
+  evidenceName: string | null
+  status: ReportStatus
+  createdAt: string
 }
 
-type StepState =
-  | 'completed'
-  | 'current'
-  | 'upcoming'
+const STATUS_LABELS: Record<
+  ReportStatus,
+  string
+> = {
+  submitted: 'Submitted',
+  'under-review': 'Under Review',
+  'in-progress': 'In Progress',
+  resolved: 'Resolved',
+}
 
-const STATUS_STEPS: StatusStep[] = [
-  {
-    status: 'pending',
-    title: 'Report submitted',
-    description:
-      'Your report has been received by ReportHub.',
-  },
-  {
-    status: 'under-review',
-    title: 'Under review',
-    description:
-      'The report is being reviewed and prioritized.',
-  },
-  {
-    status: 'action-taken',
-    title: 'Action taken',
-    description:
-      'Work has started to address the reported issue.',
-  },
-  {
-    status: 'resolved',
-    title: 'Resolved',
-    description:
-      'The reported issue has been resolved.',
-  },
+const STATUS_STEPS: ReportStatus[] = [
+  'submitted',
+  'under-review',
+  'in-progress',
+  'resolved',
 ]
-
-const REFERENCE_PATTERN =
-  /^RH-[A-Z0-9]{8}$/i
 
 function Track() {
   const [searchParams, setSearchParams] =
     useSearchParams()
 
-  const [reference, setReference] =
-    useState('')
+  const referenceFromUrl =
+    searchParams.get('reference') ?? ''
 
-  const [searchedReference, setSearchedReference] =
-    useState('')
+  const [reference, setReference] =
+    useState(referenceFromUrl)
 
   const [report, setReport] =
-    useState<Report | null>(null)
+    useState<TrackedReport | null>(null)
 
   const [error, setError] =
     useState('')
@@ -74,268 +57,105 @@ function Track() {
   const [isSearching, setIsSearching] =
     useState(false)
 
-  /*
-   * Search for a report in localStorage.
-   */
-  function searchReport(
-    reportReference: string,
-  ) {
-    const cleanedReference =
-      reportReference.trim().toUpperCase()
-
-    setError('')
-
-    if (!cleanedReference) {
-      setError(
-        'Please enter your report reference.',
-      )
-
-      setReport(null)
-      setSearchedReference('')
-
-      return
-    }
-
-    if (
-      !REFERENCE_PATTERN.test(
-        cleanedReference,
-      )
-    ) {
-      setError(
-        'Please enter a valid report reference, for example RH-12345678.',
-      )
-
-      setReport(null)
-      setSearchedReference(
-        cleanedReference,
-      )
-
-      return
-    }
-
-    setIsSearching(true)
-
-    const foundReport =
-      getReportByReference(
-        cleanedReference,
-      )
-
-    if (!foundReport) {
-      setError(
-        `No report was found with reference ${cleanedReference}. Please check the reference and try again.`,
-      )
-
-      setReport(null)
-      setSearchedReference(
-        cleanedReference,
-      )
-      setIsSearching(false)
-
-      return
-    }
-
-    setReport(foundReport)
-    setSearchedReference(
-      cleanedReference,
-    )
-    setIsSearching(false)
-  }
-
-  /*
-   * Read the report reference from the URL.
-   *
-   * Example:
-   * /track?reference=RH-12345678
-   */
   useEffect(() => {
-    const queryReference =
-      searchParams.get('reference')
-
-    if (!queryReference) {
+    if (!referenceFromUrl) {
       return
     }
 
-    const cleanedReference =
-      queryReference.trim().toUpperCase()
+    setReference(referenceFromUrl)
 
-    setReference(cleanedReference)
+    const storedReport =
+      getReportByReference(referenceFromUrl)
 
-    searchReport(cleanedReference)
+    if (!storedReport) {
+      setReport(null)
+      setError(
+        'We could not find a report with that tracking reference.',
+      )
+      return
+    }
 
-    // searchReport is intentionally used here
-    // when the URL reference changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams])
+    setReport(storedReport as TrackedReport)
+    setError('')
+  }, [referenceFromUrl])
 
-  /*
-   * Submit tracking form.
-   */
   function handleSubmit(
-    event: FormEvent<HTMLFormElement>,
+    event: React.FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault()
 
     const cleanedReference =
       reference.trim().toUpperCase()
 
-    setError('')
-
     if (!cleanedReference) {
       setError(
-        'Please enter your report reference.',
+        'Please enter your tracking reference.',
       )
-
       setReport(null)
-      setSearchedReference('')
-
       return
     }
 
-    if (
-      !REFERENCE_PATTERN.test(
-        cleanedReference,
-      )
-    ) {
-      setError(
-        'Please enter a valid report reference, for example RH-12345678.',
-      )
-
-      setReport(null)
-      setSearchedReference(
-        cleanedReference,
-      )
-
-      return
-    }
-
-    setReference(cleanedReference)
+    setIsSearching(true)
+    setError('')
 
     setSearchParams({
       reference: cleanedReference,
     })
+
+    const storedReport =
+      getReportByReference(cleanedReference)
+
+    if (!storedReport) {
+      setReport(null)
+      setError(
+        'We could not find a report with that tracking reference. Please check the reference and try again.',
+      )
+    } else {
+      setReport(
+        storedReport as TrackedReport,
+      )
+    }
+
+    setIsSearching(false)
   }
 
-  /*
-   * Handle reference input changes.
-   */
-  function handleReferenceChange(
-    value: string,
+  function formatCategory(
+    category: string,
   ) {
-    setReference(value)
-
-    setError('')
-    setReport(null)
-    setSearchedReference('')
+    return category
+      .split('-')
+      .map(
+        (word) =>
+          word.charAt(0).toUpperCase() +
+          word.slice(1),
+      )
+      .join(' ')
   }
 
-  /*
-   * Find the current status step.
-   */
-  const currentStepIndex =
-    report === null
-      ? -1
-      : STATUS_STEPS.findIndex(
-          (step) =>
-            step.status === report.status,
-        )
-
-  const currentStep =
-    currentStepIndex >= 0
-      ? STATUS_STEPS[currentStepIndex]
-      : null
-
-  /*
-   * Number of completed/current steps.
-   */
-  const completedSteps =
-    currentStepIndex >= 0
-      ? currentStepIndex + 1
-      : 0
-
-  /*
-   * Progress percentage.
-   */
-  const progressPercentage =
-    currentStepIndex >= 0
-      ? Math.round(
-          (completedSteps /
-            STATUS_STEPS.length) *
-            100,
-        )
-      : 0
-
-  /*
-   * Get timeline state.
-   */
-  function getStepState(
-    index: number,
-  ): StepState {
-    if (index < currentStepIndex) {
-      return 'completed'
-    }
-
-    if (index === currentStepIndex) {
-      return 'current'
-    }
-
-    return 'upcoming'
-  }
-
-  /*
-   * Get Bootstrap styling.
-   */
-  function getStepClass(
-    state: StepState,
-  ): string {
-    switch (state) {
-      case 'completed':
-        return 'border-success-subtle bg-success-subtle'
-
-      case 'current':
-        return 'border-primary bg-primary-subtle'
-
-      default:
-        return 'border-light bg-light'
-    }
-  }
-
-  /*
-   * Get timeline status label.
-   */
-  function getStepLabel(
-    state: StepState,
-  ): string {
-    switch (state) {
-      case 'completed':
-        return 'Completed'
-
-      case 'current':
-        return 'Current'
-
-      default:
-        return 'Pending'
-    }
-  }
-
-  /*
-   * Format submitted date.
-   */
   function formatDate(
-    dateString: string,
-  ): string {
-    const date = new Date(dateString)
+    date: string,
+  ) {
+    const parsedDate = new Date(date)
 
-    if (Number.isNaN(date.getTime())) {
-      return 'Unknown date'
+    if (
+      Number.isNaN(parsedDate.getTime())
+    ) {
+      return 'Date unavailable'
     }
 
-    return new Intl.DateTimeFormat(
+    return parsedDate.toLocaleString(
       undefined,
       {
         dateStyle: 'medium',
         timeStyle: 'short',
       },
-    ).format(date)
+    )
+  }
+
+  function getStatusIndex(
+    status: ReportStatus,
+  ) {
+    return STATUS_STEPS.indexOf(status)
   }
 
   return (
@@ -343,67 +163,53 @@ function Track() {
       <section className="container py-5">
         <div className="row justify-content-center">
           <div className="col-lg-8">
-
-            {/* Header */}
-            <header className="text-center mb-5">
+            <header className="mb-5">
               <p className="text-uppercase fw-semibold text-primary mb-2">
                 ReportHub
               </p>
 
-              <h1 className="display-6 fw-bold mb-3">
+              <h1 className="display-6 fw-bold">
                 Track your report
               </h1>
 
               <p className="lead text-secondary mb-0">
-                Enter your report reference to see
-                the current progress of your issue.
+                Enter your tracking reference to
+                see the latest status of your
+                report.
               </p>
             </header>
 
-            {/* Search Card */}
-            <div className="card border-0 shadow-sm">
-              <div className="card-body p-4 p-md-5">
+            <div className="card border-0 shadow-sm mb-4">
+              <div className="card-body p-4">
                 <form
                   onSubmit={handleSubmit}
-                  noValidate
                 >
                   <label
                     htmlFor="reference"
                     className="form-label fw-semibold"
                   >
-                    Report reference
+                    Tracking reference
                   </label>
 
-                  <div className="input-group input-group-lg">
+                  <div className="d-flex flex-column flex-sm-row gap-2">
                     <input
                       id="reference"
-                      name="reference"
                       type="text"
-                      className={`form-control ${
-                        error
-                          ? 'is-invalid'
-                          : ''
-                      }`}
-                      placeholder="RH-12345678"
+                      className="form-control form-control-lg"
+                      placeholder="Example: RH-ABC12345"
                       value={reference}
-                      onChange={(event) =>
-                        handleReferenceChange(
+                      onChange={(event) => {
+                        setReference(
                           event.target.value,
                         )
-                      }
-                      aria-describedby="reference-help reference-error"
-                      aria-invalid={
-                        error
-                          ? 'true'
-                          : 'false'
-                      }
+                        setError('')
+                      }}
                       autoComplete="off"
-                      required
                     />
 
                     <button
                       type="submit"
-                      className="btn btn-primary px-4"
+                      className="btn btn-primary btn-lg text-nowrap"
                       disabled={isSearching}
                     >
                       {isSearching
@@ -412,82 +218,135 @@ function Track() {
                     </button>
                   </div>
 
-                  {error && (
-                    <div
-                      id="reference-error"
-                      className="text-danger small mt-2"
-                      role="alert"
-                    >
-                      {error}
-                    </div>
-                  )}
-
-                  <div
-                    id="reference-help"
-                    className="form-text mt-2"
-                  >
-                    Enter the reference provided after
-                    submitting your report.
-                    <br />
-                    Example: RH-12345678
+                  <div className="form-text">
+                    Use the reference you received
+                    after submitting your report.
                   </div>
                 </form>
               </div>
             </div>
 
-            {/* Report Result */}
-            {report && currentStep && (
-              <section
-                className="card border-0 shadow-sm mt-4"
-                aria-labelledby="tracking-result-title"
+            {error && (
+              <div
+                className="alert alert-danger"
+                role="alert"
               >
-                <div className="card-body p-4 p-md-5">
+                <div className="fw-semibold">
+                  Report not found
+                </div>
 
-                  {/* Result Header */}
-                  <div className="d-flex flex-column flex-sm-row justify-content-between gap-3">
-                    <div>
-                      <p className="text-secondary mb-1">
-                        Report reference
-                      </p>
+                <div className="mt-1">
+                  {error}
+                </div>
+              </div>
+            )}
 
-                      <h2
-                        id="tracking-result-title"
-                        className="h4 fw-bold mb-0 font-monospace"
-                      >
-                        {report.reference}
-                      </h2>
+            {report && (
+              <div>
+                {/* Report summary */}
+                <div className="card border-0 shadow-sm mb-4">
+                  <div className="card-body p-4 p-md-5">
+                    <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-4">
+                      <div>
+                        <div className="text-secondary small text-uppercase fw-semibold mb-1">
+                          Tracking Reference
+                        </div>
+
+                        <div className="fs-3 fw-bold font-monospace">
+                          {report.reference}
+                        </div>
+                      </div>
+
+                      <span className="badge text-bg-primary fs-6 px-3 py-2">
+                        {
+                          STATUS_LABELS[
+                            report.status
+                          ]
+                        }
+                      </span>
                     </div>
 
-                    <span className="badge text-bg-warning align-self-start px-3 py-2">
-                      {currentStep.title}
-                    </span>
-                  </div>
+                    {/* Progress */}
+                    <div className="mb-5">
+                      <h2 className="h5 fw-bold mb-4">
+                        Report progress
+                      </h2>
 
-                  <hr className="my-4" />
+                      <div className="row g-3">
+                        {STATUS_STEPS.map(
+                          (
+                            step,
+                            index,
+                          ) => {
+                            const currentIndex =
+                              getStatusIndex(
+                                report.status,
+                              )
 
-                  {/* Report Details */}
-                  <div className="row g-3 mb-4">
+                            const completed =
+                              index <=
+                              currentIndex
 
-                    {/* Category */}
-                    <div className="col-md-6">
-                      <div className="border rounded-3 p-3 h-100">
-                        <div className="small text-secondary mb-1">
-                          Category
-                        </div>
+                            return (
+                              <div
+                                className="col-6 col-md-3"
+                                key={step}
+                              >
+                                <div
+                                  className={`border rounded-3 p-3 h-100 ${
+                                    completed
+                                      ? 'border-primary bg-primary-subtle'
+                                      : ''
+                                  }`}
+                                >
+                                  <div
+                                    className={`rounded-circle d-inline-flex align-items-center justify-content-center mb-2 ${
+                                      completed
+                                        ? 'bg-primary text-white'
+                                        : 'bg-light text-secondary'
+                                    }`}
+                                    style={{
+                                      width: '36px',
+                                      height: '36px',
+                                    }}
+                                  >
+                                    {index +
+                                      1}
+                                  </div>
 
-                        <div className="fw-semibold text-capitalize">
-                          {report.category.replace(
-                            /-/g,
-                            ' ',
-                          )}
-                        </div>
+                                  <div className="fw-semibold">
+                                    {
+                                      STATUS_LABELS[
+                                        step
+                                      ]
+                                    }
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          },
+                        )}
                       </div>
                     </div>
 
-                    {/* Submitted */}
-                    <div className="col-md-6">
-                      <div className="border rounded-3 p-3 h-100">
-                        <div className="small text-secondary mb-1">
+                    <hr />
+
+                    {/* Details */}
+                    <div className="row g-4 mt-1">
+                      <div className="col-md-6">
+                        <div className="text-secondary small mb-1">
+                          Category
+                        </div>
+
+                        <div className="fw-semibold">
+                          {formatCategory(
+                            report.category,
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="col-md-6">
+                        <div className="text-secondary small mb-1">
                           Submitted
                         </div>
 
@@ -497,263 +356,81 @@ function Track() {
                           )}
                         </div>
                       </div>
-                    </div>
 
-                    {/* Location */}
-                    <div className="col-12">
-                      <div className="border rounded-3 p-3">
-                        <div className="small text-secondary mb-1">
+                      <div className="col-12">
+                        <div className="text-secondary small mb-1">
                           Location
                         </div>
 
                         <div className="fw-semibold">
                           {report.location}
                         </div>
-                      </div>
-                    </div>
 
-                  </div>
-
-                  {/* Description */}
-                  <div className="border rounded-3 p-3 mb-4">
-                    <div className="small text-secondary mb-1">
-                      Description
-                    </div>
-
-                    <p className="mb-0">
-                      {report.description}
-                    </p>
-                  </div>
-
-                  {/* GPS Coordinates */}
-                  {report.latitude !== null &&
-                    report.longitude !== null && (
-                      <div className="border rounded-3 p-3 mb-4">
-                        <div className="small text-secondary mb-1">
-                          GPS coordinates
-                        </div>
-
-                        <div className="font-monospace small">
-                          {report.latitude.toFixed(
-                            6,
-                          )}
-                          ,{' '}
-                          {report.longitude.toFixed(
-                            6,
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                  {/* Current Status */}
-                  <div className="mb-4">
-                    <p className="text-uppercase small fw-semibold text-primary mb-2">
-                      Current status
-                    </p>
-
-                    <h3 className="h5 fw-bold">
-                      {currentStep.title}
-                    </h3>
-
-                    <p className="text-secondary mb-0">
-                      {currentStep.description}
-                    </p>
-                  </div>
-
-                  {/* Progress */}
-                  <div className="mb-4">
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <h3 className="h5 fw-bold mb-0">
-                        Report progress
-                      </h3>
-
-                      <span className="small text-secondary">
-                        {completedSteps} of{' '}
-                        {STATUS_STEPS.length}{' '}
-                        completed
-                      </span>
-                    </div>
-
-                    <div
-                      className="progress"
-                      role="progressbar"
-                      aria-label="Report progress"
-                      aria-valuenow={
-                        progressPercentage
-                      }
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      style={{
-                        height: '8px',
-                      }}
-                    >
-                      <div
-                        className="progress-bar"
-                        style={{
-                          width: `${progressPercentage}%`,
-                        }}
-                      />
-                    </div>
-
-                    <div className="text-end small text-secondary mt-1">
-                      {progressPercentage}%
-                    </div>
-                  </div>
-
-                  {/* Timeline */}
-                  <div>
-                    <h3 className="h5 fw-bold mb-3">
-                      Status timeline
-                    </h3>
-
-                    <div className="d-flex flex-column gap-3">
-                      {STATUS_STEPS.map(
-                        (step, index) => {
-                          const state =
-                            getStepState(index)
-
-                          const isCurrent =
-                            state === 'current'
-
-                          const isCompleted =
-                            state ===
-                            'completed'
-
-                          return (
-                            <div
-                              key={step.status}
-                              className={`border rounded-3 p-3 ${getStepClass(
-                                state,
-                              )}`}
-                            >
-                              <div className="d-flex align-items-start gap-3">
-
-                                {/* Indicator */}
-                                <div
-                                  className={`rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 ${
-                                    isCurrent
-                                      ? 'bg-primary text-white'
-                                      : isCompleted
-                                      ? 'bg-success text-white'
-                                      : 'bg-secondary-subtle text-secondary'
-                                  }`}
-                                  style={{
-                                    width: '36px',
-                                    height: '36px',
-                                  }}
-                                  aria-hidden="true"
-                                >
-                                  {isCompleted
-                                    ? '✓'
-                                    : index + 1}
-                                </div>
-
-                                {/* Content */}
-                                <div className="flex-grow-1">
-                                  <div className="d-flex flex-column flex-sm-row justify-content-between gap-2">
-                                    <h4 className="h6 fw-bold mb-1">
-                                      {
-                                        step.title
-                                      }
-                                    </h4>
-
-                                    <span
-                                      className={
-                                        isCurrent
-                                          ? 'small text-primary fw-semibold'
-                                          : isCompleted
-                                          ? 'small text-success fw-semibold'
-                                          : 'small text-secondary'
-                                      }
-                                    >
-                                      {getStepLabel(
-                                        state,
-                                      )}
-                                    </span>
-                                  </div>
-
-                                  <p className="small text-secondary mb-0">
-                                    {
-                                      step.description
-                                    }
-                                  </p>
-                                </div>
-
-                              </div>
+                        {report.latitude !==
+                          null &&
+                          report.longitude !==
+                            null && (
+                            <div className="text-secondary small mt-1">
+                              GPS:{' '}
+                              {
+                                report.latitude
+                              }
+                              ,{' '}
+                              {
+                                report.longitude
+                              }
                             </div>
-                          )
-                        },
+                          )}
+                      </div>
+
+                      <div className="col-12">
+                        <div className="text-secondary small mb-1">
+                          Description
+                        </div>
+
+                        <p className="mb-0">
+                          {report.description}
+                        </p>
+                      </div>
+
+                      {report.evidenceName && (
+                        <div className="col-12">
+                          <div className="text-secondary small mb-1">
+                            Evidence
+                          </div>
+
+                          <div className="fw-semibold">
+                            {report.evidenceName}
+                          </div>
+                        </div>
                       )}
                     </div>
                   </div>
+                </div>
 
-                  {/* Evidence */}
-                  {report.evidenceName && (
-                    <div className="border rounded-3 p-3 mt-4">
-                      <div className="small text-secondary mb-1">
-                        Evidence
-                      </div>
-
-                      <div className="fw-semibold">
-                        {report.evidenceName}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Prototype Notice */}
-                  <div className="alert alert-info mt-4 mb-0">
-                    <strong>
-                      Prototype:
-                    </strong>{' '}
-                    Report data is currently stored
-                    in your browser's local storage.
-                    Real-time updates will be connected
-                    to the ReportHub backend later.
+                {/* Current status message */}
+                <div className="alert alert-info">
+                  <div className="fw-semibold">
+                    What happens next?
                   </div>
 
+                  <div className="mt-1">
+                    Your report can now be reviewed
+                    and assigned to the appropriate
+                    authority for action.
+                  </div>
                 </div>
-              </section>
+              </div>
             )}
 
-            {/* Report Not Found */}
-            {!report &&
-              searchedReference &&
-              error && (
-                <div
-                  className="card border-0 shadow-sm mt-4"
-                  role="status"
-                >
-                  <div className="card-body p-4 text-center">
-
-                    <div
-                      className="d-inline-flex align-items-center justify-content-center rounded-circle bg-warning-subtle text-warning mb-3"
-                      style={{
-                        width: '56px',
-                        height: '56px',
-                        fontSize: '1.5rem',
-                      }}
-                      aria-hidden="true"
-                    >
-                      !
-                    </div>
-
-                    <h2 className="h5 fw-bold">
-                      Report not found
-                    </h2>
-
-                    <p className="text-secondary mb-0">
-                      We could not find a report
-                      matching{' '}
-                      <span className="fw-semibold">
-                        {searchedReference}
-                      </span>
-                      .
-                    </p>
-
-                  </div>
-                </div>
-              )}
-
+            <div className="text-center mt-5">
+              <Link
+                to="/report"
+                className="btn btn-outline-primary"
+              >
+                Report Another Issue
+              </Link>
+            </div>
           </div>
         </div>
       </section>

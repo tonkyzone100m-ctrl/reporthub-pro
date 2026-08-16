@@ -3,6 +3,7 @@ import type {
   ChangeEvent,
   FormEvent,
 } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { createReport } from '../services/reportService'
 import type { ReportCategory } from '../types/report'
@@ -40,6 +41,8 @@ const initialFormData: ReportFormData = {
 }
 
 function Report() {
+  const navigate = useNavigate()
+
   const [formData, setFormData] =
     useState<ReportFormData>(initialFormData)
 
@@ -47,6 +50,9 @@ function Report() {
     useState<SubmittedReport | null>(null)
 
   const [isLocating, setIsLocating] =
+    useState(false)
+
+  const [isSubmitting, setIsSubmitting] =
     useState(false)
 
   const [locationError, setLocationError] =
@@ -228,6 +234,10 @@ function Report() {
   ) {
     event.preventDefault()
 
+    if (isSubmitting) {
+      return
+    }
+
     setFormError('')
 
     const cleanedDescription =
@@ -272,25 +282,35 @@ function Report() {
       return
     }
 
-    /*
-     * Create and store the report.
-     */
-    const report = createReport({
-      category: formData.category,
-      description: cleanedDescription,
-      location: cleanedLocation,
-      latitude: formData.latitude,
-      longitude: formData.longitude,
-      evidenceName:
-        formData.evidence?.name ?? null,
-    })
+    setIsSubmitting(true)
 
-    /*
-     * Show success screen.
-     */
-    setSubmittedReport({
-      reference: report.reference,
-    })
+    try {
+      /*
+       * Create and store the report.
+       */
+      const report = createReport({
+        category: formData.category,
+        description: cleanedDescription,
+        location: cleanedLocation,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        evidenceName:
+          formData.evidence?.name ?? null,
+      })
+
+      /*
+       * Show success screen.
+       */
+      setSubmittedReport({
+        reference: report.reference,
+      })
+    } catch {
+      setFormError(
+        'We could not submit your report. Please try again.',
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   /*
@@ -324,6 +344,21 @@ function Report() {
        * Clipboard access may not be available.
        */
     }
+  }
+
+  /*
+   * Navigate directly to the tracking page.
+   */
+  function handleTrackReport() {
+    if (!submittedReport) {
+      return
+    }
+
+    navigate(
+      `/track?reference=${encodeURIComponent(
+        submittedReport.reference,
+      )}`,
+    )
   }
 
   const descriptionLength =
@@ -405,6 +440,16 @@ function Report() {
                     <button
                       type="button"
                       className="btn btn-primary"
+                      onClick={
+                        handleTrackReport
+                      }
+                    >
+                      Track This Report
+                    </button>
+
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
                       onClick={
                         handleSubmitAnother
                       }
@@ -666,8 +711,11 @@ function Report() {
                 <button
                   type="submit"
                   className="btn btn-primary btn-lg px-4"
+                  disabled={isSubmitting}
                 >
-                  Submit Report
+                  {isSubmitting
+                    ? 'Submitting...'
+                    : 'Submit Report'}
                 </button>
               </div>
             </form>
