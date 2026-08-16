@@ -11,6 +11,12 @@ import Report from './pages/Report'
 import Track from './pages/Track'
 import About from './pages/About'
 import Contact from './pages/Contact'
+import Login from './pages/Login'
+import Register from './pages/Register'
+
+import MyReports from './pages/MyReports'
+
+
 
 function NotFound() {
   return (
@@ -71,6 +77,20 @@ function App() {
           path="/contact"
           element={<Contact />}
           />
+
+<Route
+  path="/login"
+  element={<Login />}
+/>
+
+<Route
+  path="/register"
+  element={<Register />}
+/>
+<Route
+  path="/my-reports"
+  element={<MyReports />}
+/>
 
           <Route
             path="*"
