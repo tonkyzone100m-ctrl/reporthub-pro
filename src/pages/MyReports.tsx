@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom'
 
 type ReportStatus =
-  | 'Submitted'
-  | 'Under Review'
-  | 'In Progress'
-  | 'Resolved'
+  | 'submitted'
+  | 'under-review'
+  | 'in-progress'
+  | 'resolved'
 
 type Report = {
   reference: string
@@ -20,26 +20,33 @@ const reports: Report[] = [
     category: 'Road damage',
     location: 'Kigali',
     submittedAt: 'August 16, 2026',
-    status: 'Under Review',
+    status: 'under-review',
   },
   {
     reference: 'RH-2026-00118',
     category: 'Broken streetlight',
     location: 'Kicukiro',
     submittedAt: 'August 14, 2026',
-    status: 'In Progress',
+    status: 'in-progress',
   },
 ]
 
+const STATUS_LABELS: Record<ReportStatus, string> = {
+  submitted: 'Submitted',
+  'under-review': 'Under Review',
+  'in-progress': 'In Progress',
+  resolved: 'Resolved',
+}
+
 function getStatusClass(status: ReportStatus) {
   switch (status) {
-    case 'Resolved':
+    case 'resolved':
       return 'bg-success-subtle text-success'
 
-    case 'In Progress':
+    case 'in-progress':
       return 'bg-primary-subtle text-primary'
 
-    case 'Under Review':
+    case 'under-review':
       return 'bg-warning-subtle text-warning-emphasis'
 
     default:
@@ -63,8 +70,8 @@ function MyReports() {
               </h1>
 
               <p className="text-secondary mb-0">
-                Monitor the progress of infrastructure issues
-                you have reported.
+                View the reports you have submitted and
+                follow their progress.
               </p>
             </div>
 
@@ -84,83 +91,185 @@ function MyReports() {
             <div className="card border-0 shadow-sm">
               <div className="card-body text-center py-5">
                 <h2 className="h4 fw-bold">
-                  No reports yet
+                  You have no reports yet
                 </h2>
 
                 <p className="text-secondary mb-4">
-                  You have not submitted any reports.
+                  When you report an infrastructure
+                  problem, it will appear here.
                 </p>
 
                 <Link
                   to="/report"
                   className="btn btn-primary"
                 >
-                  Submit Your First Report
+                  Report an Issue
                 </Link>
               </div>
             </div>
           ) : (
-            <div className="card border-0 shadow-sm">
-              <div className="card-body p-0">
-                <div className="table-responsive">
-                  <table className="table table-hover align-middle mb-0">
-                    <thead className="table-light">
-                      <tr>
-                        <th scope="col">Reference</th>
-                        <th scope="col">Problem</th>
-                        <th scope="col">Location</th>
-                        <th scope="col">Submitted</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">
-                          <span className="visually-hidden">
-                            Actions
-                          </span>
-                        </th>
-                      </tr>
-                    </thead>
+            <>
+              <div className="row g-3 mb-4">
+                <div className="col-6 col-lg-3">
+                  <div className="card border-0 shadow-sm h-100">
+                    <div className="card-body">
+                      <div className="text-secondary small">
+                        Total Reports
+                      </div>
 
-                    <tbody>
-                      {reports.map((report) => (
-                        <tr key={report.reference}>
-                          <td>
-                            <span className="font-monospace fw-semibold">
-                              {report.reference}
-                            </span>
-                          </td>
+                      <div className="fs-3 fw-bold mt-1">
+                        {reports.length}
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-                          <td>{report.category}</td>
+                <div className="col-6 col-lg-3">
+                  <div className="card border-0 shadow-sm h-100">
+                    <div className="card-body">
+                      <div className="text-secondary small">
+                        Under Review
+                      </div>
 
-                          <td>{report.location}</td>
+                      <div className="fs-3 fw-bold mt-1">
+                        {
+                          reports.filter(
+                            (report) =>
+                              report.status ===
+                              'under-review',
+                          ).length
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-                          <td>{report.submittedAt}</td>
+                <div className="col-6 col-lg-3">
+                  <div className="card border-0 shadow-sm h-100">
+                    <div className="card-body">
+                      <div className="text-secondary small">
+                        In Progress
+                      </div>
 
-                          <td>
-                            <span
-                              className={`badge rounded-pill ${getStatusClass(
-                                report.status,
-                              )}`}
-                            >
-                              {report.status}
-                            </span>
-                          </td>
+                      <div className="fs-3 fw-bold mt-1">
+                        {
+                          reports.filter(
+                            (report) =>
+                              report.status ===
+                              'in-progress',
+                          ).length
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-                          <td>
-                            <Link
-                              to={`/track?reference=${encodeURIComponent(
-                                report.reference,
-                              )}`}
-                              className="btn btn-sm btn-outline-primary"
-                            >
-                              Track
-                            </Link>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="col-6 col-lg-3">
+                  <div className="card border-0 shadow-sm h-100">
+                    <div className="card-body">
+                      <div className="text-secondary small">
+                        Resolved
+                      </div>
+
+                      <div className="fs-3 fw-bold mt-1">
+                        {
+                          reports.filter(
+                            (report) =>
+                              report.status ===
+                              'resolved',
+                          ).length
+                        }
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+
+              <div className="card border-0 shadow-sm">
+                <div className="card-body p-0">
+                  <div className="table-responsive">
+                    <table className="table table-hover align-middle mb-0">
+                      <thead className="table-light">
+                        <tr>
+                          <th scope="col">
+                            Reference
+                          </th>
+
+                          <th scope="col">
+                            Problem
+                          </th>
+
+                          <th scope="col">
+                            Location
+                          </th>
+
+                          <th scope="col">
+                            Submitted
+                          </th>
+
+                          <th scope="col">
+                            Status
+                          </th>
+
+                          <th scope="col">
+                            Action
+                          </th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {reports.map((report) => (
+                          <tr key={report.reference}>
+                            <td>
+                              <span className="font-monospace fw-semibold">
+                                {report.reference}
+                              </span>
+                            </td>
+
+                            <td>
+                              {report.category}
+                            </td>
+
+                            <td>
+                              {report.location}
+                            </td>
+
+                            <td>
+                              {report.submittedAt}
+                            </td>
+
+                            <td>
+                              <span
+                                className={`badge rounded-pill ${getStatusClass(
+                                  report.status,
+                                )}`}
+                              >
+                                {
+                                  STATUS_LABELS[
+                                    report.status
+                                  ]
+                                }
+                              </span>
+                            </td>
+
+                            <td>
+                              <Link
+                                to={`/track?reference=${encodeURIComponent(
+                                  report.reference,
+                                )}`}
+                                className="btn btn-sm btn-outline-primary"
+                              >
+                                View Status
+                              </Link>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </section>
