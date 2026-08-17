@@ -1,4 +1,4 @@
-function AdminAIAnalyzer() {
+ï»¿function AdminAIAnalyzer() {
   return (
     <div>
       <div className="mb-4">
@@ -6,13 +6,11 @@ function AdminAIAnalyzer() {
           Decision Support
         </div>
 
-        <h2 className="fw-bold">
-          AI Report Analyzer
-        </h2>
+        <h2 className="fw-bold">AI Report Analyzer</h2>
 
         <p className="text-secondary mb-0">
-          Analyze report patterns to identify critical areas and
-          support administrative prioritization.
+          Analyze report patterns to identify critical areas and support
+          administrative prioritization.
         </p>
       </div>
 
@@ -22,8 +20,8 @@ function AdminAIAnalyzer() {
         </div>
 
         <div className="small mt-1">
-          AI recommendations are advisory. Administrators make the
-          final decisions on priorities, assignments, and actions.
+          AI recommendations are advisory. Administrators make the final
+          decisions on priorities, assignments, and actions.
         </div>
       </div>
 
@@ -34,9 +32,7 @@ function AdminAIAnalyzer() {
               <div className="text-secondary small">
                 Reports analyzed
               </div>
-              <div className="display-6 fw-bold">
-                248
-              </div>
+              <div className="display-6 fw-bold">248</div>
             </div>
           </div>
         </div>
@@ -77,29 +73,31 @@ function AdminAIAnalyzer() {
           <div className="list-group list-group-flush">
             <div className="list-group-item px-0">
               <div className="d-flex justify-content-between">
-                <strong>Road infrastructure — Kigali</strong>
+                <strong>Road infrastructure â€” Kigali</strong>
+
                 <span className="badge text-bg-danger">
                   Critical
                 </span>
               </div>
 
               <p className="small text-secondary mb-0 mt-2">
-                High concentration of related reports suggests
-                elevated infrastructure risk.
+                High concentration of related reports suggests elevated
+                infrastructure risk.
               </p>
             </div>
 
             <div className="list-group-item px-0">
               <div className="d-flex justify-content-between">
-                <strong>Street lighting — Kicukiro</strong>
+                <strong>Street lighting â€” Kicukiro</strong>
+
                 <span className="badge text-bg-warning">
                   High
                 </span>
               </div>
 
               <p className="small text-secondary mb-0 mt-2">
-                Multiple reports have been submitted within a
-                concentrated geographic area.
+                Multiple reports have been submitted within a concentrated
+                geographic area.
               </p>
             </div>
           </div>
