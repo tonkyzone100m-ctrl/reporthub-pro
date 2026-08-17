@@ -1,31 +1,26 @@
 ﻿import { Link } from 'react-router-dom'
-import ReactECharts from 'echarts-for-react'
 
-type Priority = 'Critical' | 'High' | 'Medium'
+type Priority = 'Critical' | 'High' | 'Medium' | 'Low'
 
-type DashboardReport = {
+type Report = {
   reference: string
   category: string
   location: string
   status: string
   priority: Priority
+  department: string
   age: string
 }
 
-const priorityStyles: Record<Priority, string> = {
-  Critical: 'text-bg-danger',
-  High: 'text-bg-warning',
-  Medium: 'text-bg-info',
-}
-
-const reports: DashboardReport[] = [
+const reports: Report[] = [
   {
     reference: 'RH-001245',
     category: 'Road Damage',
-    location: 'Gasabo',
+    location: 'Kigali',
     status: 'Under Review',
     priority: 'Critical',
-    age: '2h',
+    department: 'Public Works',
+    age: '2 days',
   },
   {
     reference: 'RH-001246',
@@ -33,49 +28,76 @@ const reports: DashboardReport[] = [
     location: 'Kicukiro',
     status: 'In Progress',
     priority: 'High',
-    age: '5h',
+    department: 'Utilities',
+    age: '4 days',
   },
   {
     reference: 'RH-001247',
     category: 'Drainage',
-    location: 'Nyarugenge',
+    location: 'Gasabo',
     status: 'Submitted',
     priority: 'High',
-    age: '8h',
+    department: 'Infrastructure',
+    age: '1 day',
   },
   {
     reference: 'RH-001248',
-    category: 'Road Damage',
-    location: 'Gasabo',
+    category: 'Waste Management',
+    location: 'Nyarugenge',
     status: 'Under Review',
     priority: 'Medium',
-    age: '1d',
+    department: 'Public Works',
+    age: '3 days',
   },
 ]
+
+function priorityClass(priority: Priority) {
+  switch (priority) {
+    case 'Critical':
+      return 'text-bg-danger'
+    case 'High':
+      return 'text-bg-warning'
+    case 'Medium':
+      return 'text-bg-primary'
+    default:
+      return 'text-bg-secondary'
+  }
+}
+
+function statusClass(status: string) {
+  switch (status) {
+    case 'Resolved':
+      return 'text-bg-success'
+    case 'In Progress':
+      return 'text-bg-primary'
+    case 'Under Review':
+      return 'text-bg-warning'
+    default:
+      return 'text-bg-secondary'
+  }
+}
 
 function AdminDashboard() {
   return (
     <div>
-      {/* =====================================================
-          PAGE HEADER
-      ====================================================== */}
-
+      {/* Page header */}
       <div className="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
         <div>
-          <div className="text-primary text-uppercase small fw-bold mb-1">
+          <div className="text-primary text-uppercase small fw-bold">
             Administration
           </div>
 
           <h1 className="h2 fw-bold mb-1">
-            Operations Dashboard
+            Dashboard
           </h1>
 
           <p className="text-secondary mb-0">
-            Monitor infrastructure reports, priorities, and system activity.
+            Monitor infrastructure reports, operational risks,
+            and response activity.
           </p>
         </div>
 
-        <div className="d-flex flex-wrap gap-2">
+        <div className="d-flex gap-2">
           <Link
             to="/admin/ai-analyzer"
             className="btn btn-outline-primary"
@@ -89,28 +111,23 @@ function AdminDashboard() {
             className="btn btn-primary"
           >
             <i className="bi bi-list-check me-2" />
-            Manage Reports
+            Review Reports
           </Link>
         </div>
       </div>
 
-      {/* =====================================================
-          KPI CARDS
-      ====================================================== */}
-
-      <div className="row g-3 mb-4">
-        {/* Total Reports */}
-
+      {/* KPI cards */}
+      <div className="row g-4 mb-4">
         <div className="col-sm-6 col-xl-3">
           <div className="card border-0 shadow-sm h-100">
             <div className="card-body p-4">
               <div className="d-flex justify-content-between align-items-start">
                 <div>
-                  <div className="text-secondary small fw-semibold">
+                  <div className="text-secondary small">
                     Total Reports
                   </div>
 
-                  <div className="display-6 fw-bold mt-2">
+                  <div className="display-6 fw-bold mt-1">
                     248
                   </div>
 
@@ -120,7 +137,7 @@ function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="rounded-3 bg-primary-subtle text-primary p-3">
+                <div className="bg-primary-subtle text-primary rounded-3 p-3">
                   <i className="bi bi-file-earmark-text fs-4" />
                 </div>
               </div>
@@ -128,18 +145,16 @@ function AdminDashboard() {
           </div>
         </div>
 
-        {/* Critical Reports */}
-
         <div className="col-sm-6 col-xl-3">
           <div className="card border-0 shadow-sm h-100">
             <div className="card-body p-4">
               <div className="d-flex justify-content-between align-items-start">
                 <div>
-                  <div className="text-secondary small fw-semibold">
+                  <div className="text-secondary small">
                     Critical Reports
                   </div>
 
-                  <div className="display-6 fw-bold mt-2 text-danger">
+                  <div className="display-6 fw-bold text-danger mt-1">
                     9
                   </div>
 
@@ -149,7 +164,7 @@ function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="rounded-3 bg-danger-subtle text-danger p-3">
+                <div className="bg-danger-subtle text-danger rounded-3 p-3">
                   <i className="bi bi-exclamation-octagon fs-4" />
                 </div>
               </div>
@@ -157,27 +172,25 @@ function AdminDashboard() {
           </div>
         </div>
 
-        {/* In Progress */}
-
         <div className="col-sm-6 col-xl-3">
           <div className="card border-0 shadow-sm h-100">
             <div className="card-body p-4">
               <div className="d-flex justify-content-between align-items-start">
                 <div>
-                  <div className="text-secondary small fw-semibold">
+                  <div className="text-secondary small">
                     In Progress
                   </div>
 
-                  <div className="display-6 fw-bold mt-2">
-                    67
+                  <div className="display-6 fw-bold text-primary mt-1">
+                    37
                   </div>
 
                   <div className="small text-secondary mt-2">
-                    Across active departments
+                    Active interventions
                   </div>
                 </div>
 
-                <div className="rounded-3 bg-warning-subtle text-warning p-3">
+                <div className="bg-primary-subtle text-primary rounded-3 p-3">
                   <i className="bi bi-arrow-repeat fs-4" />
                 </div>
               </div>
@@ -185,29 +198,26 @@ function AdminDashboard() {
           </div>
         </div>
 
-        {/* Resolution Rate */}
-
         <div className="col-sm-6 col-xl-3">
           <div className="card border-0 shadow-sm h-100">
             <div className="card-body p-4">
               <div className="d-flex justify-content-between align-items-start">
                 <div>
-                  <div className="text-secondary small fw-semibold">
-                    Resolution Rate
+                  <div className="text-secondary small">
+                    Resolved
                   </div>
 
-                  <div className="display-6 fw-bold mt-2">
-                    78%
+                  <div className="display-6 fw-bold text-success mt-1">
+                    202
                   </div>
 
                   <div className="small text-success mt-2">
-                    <i className="bi bi-arrow-up me-1" />
-                    4.8% improvement
+                    81.4% resolution rate
                   </div>
                 </div>
 
-                <div className="rounded-3 bg-success-subtle text-success p-3">
-                  <i className="bi bi-check2-circle fs-4" />
+                <div className="bg-success-subtle text-success rounded-3 p-3">
+                  <i className="bi bi-check-circle fs-4" />
                 </div>
               </div>
             </div>
@@ -215,572 +225,498 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* =====================================================
-          PRIORITY QUEUE + AI INTELLIGENCE
-      ====================================================== */}
-
+      {/* AI + Risk overview */}
       <div className="row g-4 mb-4">
-        {/* Priority Queue */}
-
-        <div className="col-xl-8">
+        <div className="col-lg-8">
           <div className="card border-0 shadow-sm h-100">
-            <div className="card-body p-0">
-              <div className="d-flex justify-content-between align-items-center p-4 border-bottom">
+            <div className="card-body p-4">
+              <div className="d-flex justify-content-between align-items-start mb-4">
                 <div>
+                  <div className="text-primary small text-uppercase fw-bold">
+                    Decision Support
+                  </div>
+
                   <h2 className="h5 fw-bold mb-1">
-                    Priority Queue
+                    AI Priority Insights
                   </h2>
 
-                  <p className="small text-secondary mb-0">
-                    Reports requiring administrative attention.
+                  <p className="text-secondary small mb-0">
+                    AI-generated signals to help administrators
+                    identify areas requiring attention.
                   </p>
                 </div>
 
                 <Link
-                  to="/admin/reports"
+                  to="/admin/ai-analyzer"
                   className="btn btn-sm btn-outline-primary"
                 >
-                  View all
+                  Open Analyzer
                 </Link>
               </div>
 
-              <div className="table-responsive">
-                <table className="table align-middle mb-0">
-                  <thead className="table-light">
-                    <tr>
-                      <th className="ps-4">Report</th>
-                      <th>Location</th>
-                      <th>Status</th>
-                      <th>Priority</th>
-                      <th>Age</th>
-                      <th className="pe-4" />
-                    </tr>
-                  </thead>
+              <div className="alert alert-info border-0 mb-4">
+                <div className="d-flex gap-3">
+                  <i className="bi bi-stars fs-4" />
 
-                  <tbody>
-                    {reports.map((report) => (
-                      <tr key={report.reference}>
-                        <td className="ps-4">
-                          <div className="fw-semibold">
-                            {report.reference}
-                          </div>
+                  <div>
+                    <div className="fw-semibold">
+                      Human decision remains in control
+                    </div>
 
-                          <div className="small text-secondary">
-                            {report.category}
-                          </div>
-                        </td>
+                    <div className="small mt-1">
+                      AI recommendations support administrative
+                      decisions. They do not automatically assign,
+                      prioritize, or resolve reports.
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                        <td>
-                          {report.location}
-                        </td>
+              <div className="border rounded-3 p-3 mb-3">
+                <div className="d-flex justify-content-between gap-3">
+                  <div>
+                    <div className="fw-semibold">
+                      Road infrastructure — Kigali
+                    </div>
 
-                        <td>
-                          <span className="small">
-                            {report.status}
-                          </span>
-                        </td>
+                    <div className="small text-secondary mt-1">
+                      High concentration of related reports
+                      detected in a localized area.
+                    </div>
+                  </div>
 
-                        <td>
-                          <span
-                            className={`badge ${priorityStyles[report.priority]}`}
-                          >
-                            {report.priority}
-                          </span>
-                        </td>
+                  <span className="badge text-bg-danger align-self-start">
+                    Critical
+                  </span>
+                </div>
 
-                        <td className="text-secondary">
-                          {report.age}
-                        </td>
+                <div className="row g-3 mt-1">
+                  <div className="col-md-4">
+                    <div className="small text-secondary">
+                      Related reports
+                    </div>
 
-                        <td className="pe-4">
-                          <Link
-                            to={`/admin/reports/${report.reference}`}
-                            className="btn btn-sm btn-light"
-                            aria-label={`View ${report.reference}`}
-                          >
-                            <i className="bi bi-chevron-right" />
-                          </Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    <div className="fw-bold">
+                      17
+                    </div>
+                  </div>
+
+                  <div className="col-md-4">
+                    <div className="small text-secondary">
+                      Unresolved
+                    </div>
+
+                    <div className="fw-bold">
+                      6
+                    </div>
+                  </div>
+
+                  <div className="col-md-4">
+                    <div className="small text-secondary">
+                      Signal strength
+                    </div>
+
+                    <div className="fw-bold">
+                      87%
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border rounded-3 p-3">
+                <div className="d-flex justify-content-between gap-3">
+                  <div>
+                    <div className="fw-semibold">
+                      Street lighting — Kicukiro
+                    </div>
+
+                    <div className="small text-secondary mt-1">
+                      Multiple reports are concentrated within
+                      the same geographic area.
+                    </div>
+                  </div>
+
+                  <span className="badge text-bg-warning align-self-start">
+                    High
+                  </span>
+                </div>
+
+                <div className="row g-3 mt-1">
+                  <div className="col-md-4">
+                    <div className="small text-secondary">
+                      Related reports
+                    </div>
+
+                    <div className="fw-bold">
+                      11
+                    </div>
+                  </div>
+
+                  <div className="col-md-4">
+                    <div className="small text-secondary">
+                      Unresolved
+                    </div>
+
+                    <div className="fw-bold">
+                      4
+                    </div>
+                  </div>
+
+                  <div className="col-md-4">
+                    <div className="small text-secondary">
+                      Signal strength
+                    </div>
+
+                    <div className="fw-bold">
+                      74%
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* AI Intelligence */}
-
-        <div className="col-xl-4">
+        {/* Risk summary */}
+        <div className="col-lg-4">
           <div className="card border-0 shadow-sm h-100">
             <div className="card-body p-4">
-              <div className="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                  <div className="text-primary small fw-bold text-uppercase">
-                    Decision Support
-                  </div>
-
-                  <h2 className="h5 fw-bold mt-1 mb-1">
-                    AI Intelligence
-                  </h2>
-
-                  <p className="small text-secondary mb-0">
-                    Signals detected from current report data.
-                  </p>
-                </div>
-
-                <i className="bi bi-stars text-primary fs-4" />
+              <div className="text-primary small text-uppercase fw-bold">
+                Risk Overview
               </div>
 
-              {/* Critical AI signal */}
+              <h2 className="h5 fw-bold mt-1">
+                Areas requiring attention
+              </h2>
 
-              <div className="alert alert-danger border-0 mb-3">
-                <div className="d-flex gap-2">
-                  <i className="bi bi-exclamation-octagon fs-5" />
-
-                  <div>
-                    <div className="fw-bold">
-                      Critical area detected
-                    </div>
-
-                    <div className="small mt-1">
-                      Road infrastructure reports are highly
-                      concentrated in Gasabo.
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Trend AI signal */}
-
-              <div className="alert alert-warning border-0 mb-3">
-                <div className="d-flex gap-2">
-                  <i className="bi bi-graph-up-arrow fs-5" />
-
-                  <div>
-                    <div className="fw-bold">
-                      Increasing report pattern
-                    </div>
-
-                    <div className="small mt-1">
-                      Street-lighting reports increased during
-                      the current reporting period.
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Confidence */}
-
-              <div className="border rounded-3 p-3">
-                <div className="d-flex justify-content-between">
-                  <span className="small text-secondary">
-                    Analysis confidence
+              <div className="mt-4">
+                <div className="d-flex justify-content-between mb-2">
+                  <span className="small">
+                    Critical
                   </span>
 
-                  <strong>
-                    87%
+                  <strong className="text-danger">
+                    9
                   </strong>
                 </div>
 
-                <div
-                  className="progress mt-2"
-                  style={{ height: '6px' }}
-                >
+                <div className="progress mb-4" style={{ height: '8px' }}>
                   <div
-                    className="progress-bar"
-                    style={{ width: '87%' }}
+                    className="progress-bar bg-danger"
+                    style={{ width: '25%' }}
+                  />
+                </div>
+
+                <div className="d-flex justify-content-between mb-2">
+                  <span className="small">
+                    High
+                  </span>
+
+                  <strong className="text-warning">
+                    31
+                  </strong>
+                </div>
+
+                <div className="progress mb-4" style={{ height: '8px' }}>
+                  <div
+                    className="progress-bar bg-warning"
+                    style={{ width: '55%' }}
+                  />
+                </div>
+
+                <div className="d-flex justify-content-between mb-2">
+                  <span className="small">
+                    Medium
+                  </span>
+
+                  <strong className="text-primary">
+                    72
+                  </strong>
+                </div>
+
+                <div className="progress mb-4" style={{ height: '8px' }}>
+                  <div
+                    className="progress-bar bg-primary"
+                    style={{ width: '70%' }}
+                  />
+                </div>
+
+                <div className="d-flex justify-content-between mb-2">
+                  <span className="small">
+                    Low
+                  </span>
+
+                  <strong className="text-secondary">
+                    136
+                  </strong>
+                </div>
+
+                <div className="progress" style={{ height: '8px' }}>
+                  <div
+                    className="progress-bar bg-secondary"
+                    style={{ width: '90%' }}
                   />
                 </div>
               </div>
 
-              <div className="small text-secondary mt-3">
-                <i className="bi bi-info-circle me-1" />
-
-                AI recommendations support administrators.
-                Final decisions remain under human control.
-              </div>
+              <hr className="my-4" />
 
               <Link
-                to="/admin/ai-analyzer"
-                className="btn btn-primary w-100 mt-3"
+                to="/admin/map"
+                className="btn btn-outline-primary w-100"
               >
-                Open AI Analyzer
+                <i className="bi bi-geo-alt me-2" />
+                View Risk Map
               </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* =====================================================
-          ANALYTICS
-      ====================================================== */}
-
-      <div className="row g-4 mb-4">
-        {/* Report Activity */}
-
-        <div className="col-lg-7">
-          <div className="card border-0 shadow-sm h-100">
-            <div className="card-body p-4">
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                  <h2 className="h5 fw-bold mb-1">
-                    Report Activity
-                  </h2>
-
-                  <p className="small text-secondary mb-0">
-                    Report submission trend over the last six months.
-                  </p>
-                </div>
-
-                <select
-                  className="form-select form-select-sm"
-                  style={{ width: '130px' }}
-                  defaultValue="6"
-                  aria-label="Report activity period"
-                >
-                  <option value="6">
-                    6 months
-                  </option>
-
-                  <option value="12">
-                    12 months
-                  </option>
-                </select>
+      {/* Recent reports */}
+      <div className="card border-0 shadow-sm mb-4">
+        <div className="card-body p-4">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <div className="text-primary small text-uppercase fw-bold">
+                Operations
               </div>
 
-              <ReactECharts
-                style={{ height: '300px' }}
-                option={{
-                  tooltip: {
-                    trigger: 'axis',
-                  },
-
-                  grid: {
-                    left: 40,
-                    right: 20,
-                    top: 20,
-                    bottom: 35,
-                  },
-
-                  xAxis: {
-                    type: 'category',
-
-                    data: [
-                      'Mar',
-                      'Apr',
-                      'May',
-                      'Jun',
-                      'Jul',
-                      'Aug',
-                    ],
-
-                    axisTick: {
-                      show: false,
-                    },
-                  },
-
-                  yAxis: {
-                    type: 'value',
-
-                    splitLine: {
-                      lineStyle: {
-                        type: 'dashed',
-                      },
-                    },
-                  },
-
-                  series: [
-                    {
-                      name: 'Reports',
-                      type: 'line',
-
-                      data: [
-                        42,
-                        58,
-                        51,
-                        73,
-                        66,
-                        84,
-                      ],
-
-                      smooth: true,
-
-                      symbol: 'circle',
-
-                      symbolSize: 8,
-
-                      lineStyle: {
-                        width: 3,
-                      },
-
-                      areaStyle: {
-                        opacity: 0.08,
-                      },
-                    },
-                  ],
-                }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Reports by Category */}
-
-        <div className="col-lg-5">
-          <div className="card border-0 shadow-sm h-100">
-            <div className="card-body p-4">
               <h2 className="h5 fw-bold mb-1">
-                Reports by Category
+                Recent Reports
               </h2>
 
-              <p className="small text-secondary mb-3">
-                Distribution of infrastructure issues.
+              <p className="text-secondary small mb-0">
+                Reports requiring monitoring and administrative action.
               </p>
-
-              <ReactECharts
-                style={{ height: '300px' }}
-                option={{
-                  tooltip: {
-                    trigger: 'item',
-                  },
-
-                  legend: {
-                    orient: 'vertical',
-                    right: 0,
-                    top: 'center',
-                  },
-
-                  series: [
-                    {
-                      name: 'Reports',
-
-                      type: 'pie',
-
-                      radius: [
-                        '52%',
-                        '75%',
-                      ],
-
-                      center: [
-                        '35%',
-                        '50%',
-                      ],
-
-                      avoidLabelOverlap: true,
-
-                      itemStyle: {
-                        borderRadius: 6,
-                        borderColor: '#fff',
-                        borderWidth: 2,
-                      },
-
-                      label: {
-                        show: false,
-                      },
-
-                      data: [
-                        {
-                          value: 94,
-                          name: 'Road Damage',
-                        },
-                        {
-                          value: 59,
-                          name: 'Street Lighting',
-                        },
-                        {
-                          value: 45,
-                          name: 'Drainage',
-                        },
-                        {
-                          value: 30,
-                          name: 'Waste Management',
-                        },
-                        {
-                          value: 20,
-                          name: 'Other',
-                        },
-                      ],
-                    },
-                  ],
-                }}
-              />
             </div>
+
+            <Link
+              to="/admin/reports"
+              className="btn btn-sm btn-outline-secondary"
+            >
+              View all
+            </Link>
+          </div>
+
+          <div className="table-responsive">
+            <table className="table align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Reference</th>
+                  <th>Category</th>
+                  <th>Location</th>
+                  <th>Status</th>
+                  <th>Priority</th>
+                  <th>Department</th>
+                  <th>Age</th>
+                  <th />
+                </tr>
+              </thead>
+
+              <tbody>
+                {reports.map((report) => (
+                  <tr key={report.reference}>
+                    <td className="fw-semibold">
+                      {report.reference}
+                    </td>
+
+                    <td>
+                      {report.category}
+                    </td>
+
+                    <td>
+                      {report.location}
+                    </td>
+
+                    <td>
+                      <span className={`badge ${statusClass(report.status)}`}>
+                        {report.status}
+                      </span>
+                    </td>
+
+                    <td>
+                      <span className={`badge ${priorityClass(report.priority)}`}>
+                        {report.priority}
+                      </span>
+                    </td>
+
+                    <td>
+                      {report.department}
+                    </td>
+
+                    <td className="text-secondary">
+                      {report.age}
+                    </td>
+
+                    <td>
+                      <Link
+                        to={`/admin/reports/${report.reference}`}
+                        className="btn btn-sm btn-outline-primary"
+                      >
+                        Review
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      {/* =====================================================
-          DEPARTMENT WORKLOAD + RECENT ACTIVITY
-      ====================================================== */}
-
+      {/* Bottom operational panels */}
       <div className="row g-4">
-        {/* Department Workload */}
-
         <div className="col-lg-6">
           <div className="card border-0 shadow-sm h-100">
             <div className="card-body p-4">
               <div className="d-flex justify-content-between mb-4">
                 <div>
-                  <h2 className="h5 fw-bold mb-1">
-                    Department Workload
-                  </h2>
+                  <div className="text-primary small text-uppercase fw-bold">
+                    Activity
+                  </div>
 
-                  <p className="small text-secondary mb-0">
-                    Active reports by responsible department.
-                  </p>
+                  <h2 className="h5 fw-bold mb-0">
+                    Recent Activity
+                  </h2>
                 </div>
 
-                <Link
-                  to="/admin/departments"
-                  className="btn btn-sm btn-outline-secondary"
-                >
-                  Manage
-                </Link>
+                <i className="bi bi-activity fs-4 text-primary" />
               </div>
 
-              {[
-                {
-                  name: 'Public Works',
-                  reports: 31,
-                },
-                {
-                  name: 'Infrastructure',
-                  reports: 24,
-                },
-                {
-                  name: 'Utilities',
-                  reports: 18,
-                },
-                {
-                  name: 'Environment',
-                  reports: 11,
-                },
-              ].map((department) => (
-                <div
-                  key={department.name}
-                  className="mb-3"
-                >
-                  <div className="d-flex justify-content-between small mb-1">
-                    <span className="fw-semibold">
-                      {department.name}
-                    </span>
+              <div className="d-flex gap-3 mb-4">
+                <div className="text-success">
+                  <i className="bi bi-check-circle fs-5" />
+                </div>
 
-                    <span className="text-secondary">
-                      {department.reports} active
-                    </span>
+                <div>
+                  <div className="fw-semibold">
+                    Report RH-001239 resolved
                   </div>
 
-                  <div
-                    className="progress"
-                    style={{ height: '8px' }}
-                  >
-                    <div
-                      className="progress-bar"
-                      style={{
-                        width: `${Math.min(
-                          department.reports * 2.5,
-                          100,
-                        )}%`,
-                      }}
-                    />
+                  <div className="small text-secondary">
+                    Public Works marked the issue as resolved.
+                  </div>
+
+                  <div className="small text-muted mt-1">
+                    18 minutes ago
                   </div>
                 </div>
-              ))}
+              </div>
+
+              <div className="d-flex gap-3 mb-4">
+                <div className="text-primary">
+                  <i className="bi bi-person-check fs-5" />
+                </div>
+
+                <div>
+                  <div className="fw-semibold">
+                    RH-001246 assigned
+                  </div>
+
+                  <div className="small text-secondary">
+                    Assigned to Utilities for investigation.
+                  </div>
+
+                  <div className="small text-muted mt-1">
+                    42 minutes ago
+                  </div>
+                </div>
+              </div>
+
+              <div className="d-flex gap-3">
+                <div className="text-warning">
+                  <i className="bi bi-stars fs-5" />
+                </div>
+
+                <div>
+                  <div className="fw-semibold">
+                    New AI priority signal
+                  </div>
+
+                  <div className="small text-secondary">
+                    A potential infrastructure cluster was detected.
+                  </div>
+
+                  <div className="small text-muted mt-1">
+                    1 hour ago
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Recent Activity */}
-
         <div className="col-lg-6">
           <div className="card border-0 shadow-sm h-100">
             <div className="card-body p-4">
-              <div className="d-flex justify-content-between mb-3">
-                <div>
-                  <h2 className="h5 fw-bold mb-1">
-                    Recent Activity
-                  </h2>
-
-                  <p className="small text-secondary mb-0">
-                    Latest administrative events.
-                  </p>
-                </div>
-
-                <Link
-                  to="/admin/notifications"
-                  className="btn btn-sm btn-outline-secondary"
-                >
-                  View all
-                </Link>
+              <div className="text-primary small text-uppercase fw-bold">
+                Quick Actions
               </div>
 
-              <div className="list-group list-group-flush">
-                {/* Activity 1 */}
+              <h2 className="h5 fw-bold mb-4">
+                Administrative tools
+              </h2>
 
-                <div className="list-group-item px-0 d-flex gap-3">
-                  <div className="rounded-circle bg-danger-subtle text-danger p-2 align-self-start">
-                    <i className="bi bi-exclamation-triangle" />
-                  </div>
-
-                  <div>
-                    <div className="small fw-semibold">
-                      Critical report identified
-                    </div>
-
-                    <div className="small text-secondary">
-                      RH-001245 was flagged for immediate review.
-                    </div>
-
-                    <div className="small text-secondary mt-1">
-                      12 minutes ago
-                    </div>
-                  </div>
+              <div className="row g-3">
+                <div className="col-sm-6">
+                  <Link
+                    to="/admin/reports"
+                    className="btn btn-light border w-100 text-start p-3"
+                  >
+                    <i className="bi bi-file-earmark-text fs-5 d-block mb-2 text-primary" />
+                    <span className="fw-semibold d-block">
+                      Review Reports
+                    </span>
+                    <span className="small text-secondary">
+                      Manage incoming issues
+                    </span>
+                  </Link>
                 </div>
 
-                {/* Activity 2 */}
-
-                <div className="list-group-item px-0 d-flex gap-3">
-                  <div className="rounded-circle bg-primary-subtle text-primary p-2 align-self-start">
-                    <i className="bi bi-person-check" />
-                  </div>
-
-                  <div>
-                    <div className="small fw-semibold">
-                      Report assigned
-                    </div>
-
-                    <div className="small text-secondary">
-                      RH-001246 assigned to Infrastructure.
-                    </div>
-
-                    <div className="small text-secondary mt-1">
-                      38 minutes ago
-                    </div>
-                  </div>
+                <div className="col-sm-6">
+                  <Link
+                    to="/admin/ai-analyzer"
+                    className="btn btn-light border w-100 text-start p-3"
+                  >
+                    <i className="bi bi-stars fs-5 d-block mb-2 text-primary" />
+                    <span className="fw-semibold d-block">
+                      AI Analyzer
+                    </span>
+                    <span className="small text-secondary">
+                      Analyze priority signals
+                    </span>
+                  </Link>
                 </div>
 
-                {/* Activity 3 */}
+                <div className="col-sm-6">
+                  <Link
+                    to="/admin/map"
+                    className="btn btn-light border w-100 text-start p-3"
+                  >
+                    <i className="bi bi-map fs-5 d-block mb-2 text-primary" />
+                    <span className="fw-semibold d-block">
+                      Map Monitoring
+                    </span>
+                    <span className="small text-secondary">
+                      Explore geographic risks
+                    </span>
+                  </Link>
+                </div>
 
-                <div className="list-group-item px-0 d-flex gap-3">
-                  <div className="rounded-circle bg-success-subtle text-success p-2 align-self-start">
-                    <i className="bi bi-check-circle" />
-                  </div>
-
-                  <div>
-                    <div className="small fw-semibold">
-                      Report resolved
-                    </div>
-
-                    <div className="small text-secondary">
-                      RH-001239 was marked as resolved.
-                    </div>
-
-                    <div className="small text-secondary mt-1">
-                      1 hour ago
-                    </div>
-                  </div>
+                <div className="col-sm-6">
+                  <Link
+                    to="/admin/analytics"
+                    className="btn btn-light border w-100 text-start p-3"
+                  >
+                    <i className="bi bi-bar-chart fs-5 d-block mb-2 text-primary" />
+                    <span className="fw-semibold d-block">
+                      Analytics
+                    </span>
+                    <span className="small text-secondary">
+                      Measure performance
+                    </span>
+                  </Link>
                 </div>
               </div>
             </div>
