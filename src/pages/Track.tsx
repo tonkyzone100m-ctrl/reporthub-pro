@@ -4,41 +4,67 @@ import { Link, useSearchParams } from 'react-router-dom'
 
 import { getReportByReference } from '../services/reportService'
 
-type ReportStatus =
+import type {
+  Report,
+  ReportStatus as AdminReportStatus,
+} from '../types/report'
+
+/*
+ * ============================================================
+ * PUBLIC TRACKING STATUS
+ * ============================================================
+ */
+
+type TrackingStatus =
   | 'submitted'
   | 'under-review'
   | 'in-progress'
   | 'resolved'
 
-type TrackedReport = {
-  reference: string
-  category: string
-  description: string
-  location: string
-  latitude: number | null
-  longitude: number | null
-  evidenceName: string | null
-  status: ReportStatus
-  createdAt: string
-}
-
-const STATUS_LABELS: Record<ReportStatus, string> = {
+const STATUS_LABELS: Record<TrackingStatus, string> = {
   submitted: 'Submitted',
   'under-review': 'Under Review',
   'in-progress': 'In Progress',
   resolved: 'Resolved',
 }
 
-const STATUS_STEPS: ReportStatus[] = [
+const STATUS_STEPS: TrackingStatus[] = [
   'submitted',
   'under-review',
   'in-progress',
   'resolved',
 ]
 
+/*
+ * Convert administrative status into
+ * public tracking status.
+ */
+function getTrackingStatus(
+  status: AdminReportStatus,
+): TrackingStatus {
+  switch (status) {
+    case 'Under Review':
+      return 'under-review'
+
+    case 'In Progress':
+      return 'in-progress'
+
+    case 'Resolved':
+      return 'resolved'
+
+    default:
+      return 'submitted'
+  }
+}
+
+/*
+ * ============================================================
+ * TRACK PAGE
+ * ============================================================
+ */
+
 function Track() {
-  const [searchParams, setSearchParams] =
-    useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const referenceFromUrl =
     searchParams.get('reference') ?? ''
@@ -47,15 +73,21 @@ function Track() {
     useState(referenceFromUrl)
 
   const [report, setReport] =
-    useState<TrackedReport | null>(null)
+    useState<Report | null>(null)
 
   const [error, setError] = useState('')
 
   const [isSearching, setIsSearching] =
     useState(false)
 
+  /*
+   * ==========================================================
+   * LOAD REPORT FROM URL
+   * ==========================================================
+   */
+
   useEffect(() => {
-    if (!referenceFromUrl) {
+    if (!referenceFromUrl.trim()) {
       setReport(null)
       setError('')
       return
@@ -71,15 +103,23 @@ function Track() {
 
     if (!storedReport) {
       setReport(null)
+
       setError(
         'We could not find a report with that tracking reference. Please check the reference and try again.',
       )
+
       return
     }
 
-    setReport(storedReport as TrackedReport)
+    setReport(storedReport)
     setError('')
   }, [referenceFromUrl])
+
+  /*
+   * ==========================================================
+   * SEARCH FOR REPORT
+   * ==========================================================
+   */
 
   function handleSubmit(
     event: FormEvent<HTMLFormElement>,
@@ -91,9 +131,11 @@ function Track() {
 
     if (!cleanedReference) {
       setReport(null)
+
       setError(
         'Please enter the tracking reference from your report confirmation.',
       )
+
       return
     }
 
@@ -105,31 +147,31 @@ function Track() {
 
     if (!storedReport) {
       setReport(null)
+
       setError(
         'We could not find a report with that tracking reference. Please check the reference and try again.',
       )
-    } else {
-      setReport(storedReport as TrackedReport)
-      setSearchParams({
-        reference: cleanedReference,
-      })
+
+      setIsSearching(false)
+      return
     }
+
+    setReport(storedReport)
+
+    setSearchParams({
+      reference: cleanedReference,
+    })
 
     setIsSearching(false)
   }
 
-  function formatCategory(category: string) {
-    return category
-      .split('-')
-      .map(
-        (word) =>
-          word.charAt(0).toUpperCase() +
-          word.slice(1),
-      )
-      .join(' ')
-  }
+  /*
+   * ==========================================================
+   * FORMAT DATE
+   * ==========================================================
+   */
 
-  function formatDate(date: string) {
+  function formatDate(date: string): string {
     const parsedDate = new Date(date)
 
     if (Number.isNaN(parsedDate.getTime())) {
@@ -142,11 +184,15 @@ function Track() {
     })
   }
 
-  function getStatusIndex(status: ReportStatus) {
-    return STATUS_STEPS.indexOf(status)
-  }
+  /*
+   * ==========================================================
+   * STATUS MESSAGE
+   * ==========================================================
+   */
 
-  function getStatusMessage(status: ReportStatus) {
+  function getStatusMessage(
+    status: TrackingStatus,
+  ): string {
     switch (status) {
       case 'submitted':
         return 'Your report has been received and is waiting for review.'
@@ -159,15 +205,42 @@ function Track() {
 
       case 'resolved':
         return 'The reported problem has been marked as resolved.'
+
+      default:
+        return 'Your report has been received.'
     }
   }
 
-  const currentStatusIndex = report
-    ? getStatusIndex(report.status)
-    : -1
+  /*
+   * ==========================================================
+   * CURRENT STATUS
+   * ==========================================================
+   */
+
+  const currentTrackingStatus =
+    report
+      ? getTrackingStatus(report.status)
+      : null
+
+  const currentStatusIndex =
+    currentTrackingStatus
+      ? STATUS_STEPS.indexOf(
+          currentTrackingStatus,
+        )
+      : -1
+
+  /*
+   * ==========================================================
+   * RENDER
+   * ==========================================================
+   */
 
   return (
     <main>
+      {/* ======================================================
+          PAGE HEADER
+      ====================================================== */}
+
       <section className="bg-light py-5">
         <div className="container">
           <div className="row justify-content-center">
@@ -190,12 +263,18 @@ function Track() {
         </div>
       </section>
 
+      {/* ======================================================
+          SEARCH
+      ====================================================== */}
+
       <section className="py-5">
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-8">
+
               <div className="card border-0 shadow-sm mb-4">
                 <div className="card-body p-4 p-md-5">
+
                   <h2 className="h5 fw-bold mb-3">
                     Find your report
                   </h2>
@@ -209,16 +288,18 @@ function Track() {
                     </label>
 
                     <div className="d-flex flex-column flex-sm-row gap-2">
+
                       <input
                         id="reference"
                         type="text"
                         className="form-control form-control-lg"
-                        placeholder="e.g. RH-ABC12345"
+                        placeholder="e.g. RH-001245"
                         value={reference}
                         onChange={(event) => {
                           setReference(
                             event.target.value,
                           )
+
                           setError('')
                         }}
                         autoComplete="off"
@@ -234,6 +315,7 @@ function Track() {
                           ? 'Checking...'
                           : 'Check Status'}
                       </button>
+
                     </div>
 
                     <div className="form-text">
@@ -241,8 +323,13 @@ function Track() {
                       when you submitted the report.
                     </div>
                   </form>
+
                 </div>
               </div>
+
+              {/* ==================================================
+                  ERROR
+              ================================================== */}
 
               {error && (
                 <div
@@ -259,190 +346,232 @@ function Track() {
                 </div>
               )}
 
-              {report && (
-                <>
-                  <div className="card border-0 shadow-sm mb-4">
-                    <div className="card-body p-4 p-md-5">
-                      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3">
-                        <div>
-                          <div className="text-secondary small text-uppercase fw-semibold mb-1">
-                            Tracking reference
+              {/* ==================================================
+                  REPORT RESULT
+              ================================================== */}
+
+              {report &&
+                currentTrackingStatus && (
+                  <>
+
+                    {/* ==============================================
+                        STATUS CARD
+                    ============================================== */}
+
+                    <div className="card border-0 shadow-sm mb-4">
+                      <div className="card-body p-4 p-md-5">
+
+                        <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3">
+
+                          <div>
+                            <div className="text-secondary small text-uppercase fw-semibold mb-1">
+                              Tracking reference
+                            </div>
+
+                            <div className="fs-3 fw-bold font-monospace">
+                              {report.reference}
+                            </div>
                           </div>
 
-                          <div className="fs-3 fw-bold font-monospace">
-                            {report.reference}
-                          </div>
+                          <span className="badge text-bg-primary fs-6 px-3 py-2">
+                            {
+                              STATUS_LABELS[
+                                currentTrackingStatus
+                              ]
+                            }
+                          </span>
+
                         </div>
 
-                        <span className="badge text-bg-primary fs-6 px-3 py-2">
-                          {STATUS_LABELS[
-                            report.status
-                          ]}
-                        </span>
-                      </div>
+                        <hr className="my-4" />
 
-                      <hr className="my-4" />
+                        <h2 className="h5 fw-bold mb-4">
+                          Report progress
+                        </h2>
 
-                      <h2 className="h5 fw-bold mb-4">
-                        Report progress
-                      </h2>
+                        <div className="row g-3">
 
-                      <div className="row g-3">
-                        {STATUS_STEPS.map(
-                          (step, index) => {
-                            const completed =
-                              index <=
-                              currentStatusIndex
+                          {STATUS_STEPS.map(
+                            (step, index) => {
+                              const completed =
+                                index <=
+                                currentStatusIndex
 
-                            const current =
-                              index ===
-                              currentStatusIndex
+                              const current =
+                                index ===
+                                currentStatusIndex
 
-                            return (
-                              <div
-                                className="col-6 col-md-3"
-                                key={step}
-                              >
+                              return (
                                 <div
-                                  className={`border rounded-3 p-3 h-100 ${
-                                    completed
-                                      ? 'border-primary bg-primary-subtle'
-                                      : ''
-                                  }`}
+                                  className="col-6 col-md-3"
+                                  key={step}
                                 >
                                   <div
-                                    className={`rounded-circle d-inline-flex align-items-center justify-content-center mb-2 ${
+                                    className={`border rounded-3 p-3 h-100 ${
                                       completed
-                                        ? 'bg-primary text-white'
-                                        : 'bg-light text-secondary'
+                                        ? 'border-primary bg-primary-subtle'
+                                        : ''
                                     }`}
-                                    style={{
-                                      width: '36px',
-                                      height: '36px',
-                                    }}
                                   >
-                                    {index + 1}
-                                  </div>
 
-                                  <div className="fw-semibold">
-                                    {
-                                      STATUS_LABELS[
-                                        step
-                                      ]
-                                    }
-                                  </div>
-
-                                  {current && (
-                                    <div className="small text-primary mt-1">
-                                      Current status
+                                    <div
+                                      className={`rounded-circle d-inline-flex align-items-center justify-content-center mb-2 ${
+                                        completed
+                                          ? 'bg-primary text-white'
+                                          : 'bg-light text-secondary'
+                                      }`}
+                                      style={{
+                                        width: '36px',
+                                        height: '36px',
+                                      }}
+                                    >
+                                      {index + 1}
                                     </div>
-                                  )}
+
+                                    <div className="fw-semibold">
+                                      {
+                                        STATUS_LABELS[
+                                          step
+                                        ]
+                                      }
+                                    </div>
+
+                                    {current && (
+                                      <div className="small text-primary mt-1">
+                                        Current status
+                                      </div>
+                                    )}
+
+                                  </div>
                                 </div>
-                              </div>
-                            )
-                          },
-                        )}
+                              )
+                            },
+                          )}
+
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="card border-0 shadow-sm mb-4">
-                    <div className="card-body p-4 p-md-5">
-                      <h2 className="h5 fw-bold mb-4">
-                        Report details
-                      </h2>
+                    {/* ==============================================
+                        REPORT DETAILS
+                    ============================================== */}
 
-                      <div className="row g-4">
-                        <div className="col-md-6">
-                          <div className="text-secondary small mb-1">
-                            Problem type
-                          </div>
+                    <div className="card border-0 shadow-sm mb-4">
+                      <div className="card-body p-4 p-md-5">
 
-                          <div className="fw-semibold">
-                            {formatCategory(
-                              report.category,
-                            )}
-                          </div>
-                        </div>
+                        <h2 className="h5 fw-bold mb-4">
+                          Report details
+                        </h2>
 
-                        <div className="col-md-6">
-                          <div className="text-secondary small mb-1">
-                            Submitted
-                          </div>
+                        <div className="row g-4">
 
-                          <div className="fw-semibold">
-                            {formatDate(
-                              report.createdAt,
-                            )}
-                          </div>
-                        </div>
+                          {/* CATEGORY */}
 
-                        <div className="col-12">
-                          <div className="text-secondary small mb-1">
-                            Location
-                          </div>
-
-                          <div className="fw-semibold">
-                            {report.location}
-                          </div>
-
-                          {report.latitude !==
-                            null &&
-                            report.longitude !==
-                              null && (
-                              <div className="text-secondary small mt-1">
-                                GPS coordinates:{' '}
-                                {
-                                  report.latitude
-                                }
-                                ,{' '}
-                                {
-                                  report.longitude
-                                }
-                              </div>
-                            )}
-                        </div>
-
-                        <div className="col-12">
-                          <div className="text-secondary small mb-1">
-                            Description
-                          </div>
-
-                          <p className="mb-0">
-                            {report.description}
-                          </p>
-                        </div>
-
-                        {report.evidenceName && (
-                          <div className="col-12">
+                          <div className="col-md-6">
                             <div className="text-secondary small mb-1">
-                              Photo evidence
+                              Problem type
                             </div>
 
                             <div className="fw-semibold">
-                              {report.evidenceName}
+                              {report.category}
                             </div>
                           </div>
+
+                          {/* SUBMITTED */}
+
+                          <div className="col-md-6">
+                            <div className="text-secondary small mb-1">
+                              Submitted
+                            </div>
+
+                            <div className="fw-semibold">
+                              {formatDate(
+                                report.createdAt,
+                              )}
+                            </div>
+                          </div>
+
+                          {/* LOCATION */}
+
+                          <div className="col-12">
+                            <div className="text-secondary small mb-1">
+                              Location
+                            </div>
+
+                            <div className="fw-semibold">
+                              {report.location}
+                            </div>
+
+                            {report.latitude !==
+                              null &&
+                              report.longitude !==
+                                null && (
+                                <div className="text-secondary small mt-1">
+                                  GPS coordinates:{' '}
+                                  {report.latitude},{' '}
+                                  {report.longitude}
+                                </div>
+                              )}
+                          </div>
+
+                          {/* DESCRIPTION */}
+
+                          <div className="col-12">
+                            <div className="text-secondary small mb-1">
+                              Description
+                            </div>
+
+                            <p className="mb-0">
+                              {report.description}
+                            </p>
+                          </div>
+
+                          {/* EVIDENCE */}
+
+                          {report.evidence.length >
+                            0 && (
+                            <div className="col-12">
+                              <div className="text-secondary small mb-1">
+                                Photo evidence
+                              </div>
+
+                              <div className="fw-semibold">
+                                {report.evidence.join(
+                                  ', ',
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ==============================================
+                        CURRENT UPDATE
+                    ============================================== */}
+
+                    <div className="alert alert-info mb-4">
+                      <div className="fw-semibold">
+                        Current update
+                      </div>
+
+                      <div className="mt-1">
+                        {getStatusMessage(
+                          currentTrackingStatus,
                         )}
                       </div>
                     </div>
-                  </div>
 
-                  <div className="alert alert-info mb-4">
-                    <div className="fw-semibold">
-                      Current update
-                    </div>
+                  </>
+                )}
 
-                    <div className="mt-1">
-                      {getStatusMessage(
-                        report.status,
-                      )}
-                    </div>
-                  </div>
-                </>
-              )}
+              {/* ==================================================
+                  ACTIONS
+              ================================================== */}
 
               <div className="d-flex flex-column flex-sm-row justify-content-center gap-2 mt-4">
+
                 <Link
                   to="/report"
                   className="btn btn-primary"
@@ -456,7 +585,9 @@ function Track() {
                 >
                   View My Reports
                 </Link>
+
               </div>
+
             </div>
           </div>
         </div>

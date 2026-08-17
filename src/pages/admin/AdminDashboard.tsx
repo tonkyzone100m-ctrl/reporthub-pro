@@ -1,11 +1,10 @@
-﻿import {
-  Bar,
-  BarChart,
+import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import {
+  Area,
+  AreaChart,
   CartesianGrid,
   Cell,
-  Legend,
-  Line,
-  LineChart,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -13,587 +12,1094 @@
   XAxis,
   YAxis,
 } from 'recharts'
-import { Link } from 'react-router-dom'
 
-type Stat = {
+type ReportStatus =
+  | 'Under Review'
+  | 'In Progress'
+  | 'Resolved'
+
+type ReportPriority =
+  | 'Critical'
+  | 'High'
+  | 'Medium'
+
+type Report = {
+  reference: string
+  category: string
+  location: string
+  priority: ReportPriority
+  status: ReportStatus
+  submitted: string
+}
+
+type StatCardProps = {
   label: string
   value: string
   description: string
   icon: string
   iconClass: string
+  href?: string
 }
 
-type CriticalReport = {
-  reference: string
-  category: string
-  location: string
-  priority: 'Critical' | 'High' | 'Medium'
-  status: string
-  age: string
-}
-
-const stats: Stat[] = [
+const recentReports: Report[] = [
   {
-    label: 'Total Reports',
-    value: '248',
-    description: '+12% this month',
-    icon: 'bi-file-earmark-text',
-    iconClass: 'text-primary bg-primary-subtle',
-  },
-  {
-    label: 'Critical Reports',
-    value: '9',
-    description: 'Requires attention',
-    icon: 'bi-exclamation-triangle',
-    iconClass: 'text-danger bg-danger-subtle',
-  },
-  {
-    label: 'Under Review',
-    value: '31',
-    description: 'Awaiting assessment',
-    icon: 'bi-search',
-    iconClass: 'text-warning bg-warning-subtle',
-  },
-  {
-    label: 'Resolved',
-    value: '193',
-    description: '78% resolution rate',
-    icon: 'bi-check-circle',
-    iconClass: 'text-success bg-success-subtle',
-  },
-]
-
-const reportTrendData = [
-  { month: 'Mar', reports: 42, resolved: 31 },
-  { month: 'Apr', reports: 51, resolved: 38 },
-  { month: 'May', reports: 47, resolved: 35 },
-  { month: 'Jun', reports: 63, resolved: 49 },
-  { month: 'Jul', reports: 72, resolved: 57 },
-  { month: 'Aug', reports: 84, resolved: 65 },
-]
-
-const categoryData = [
-  { category: 'Roads', reports: 76 },
-  { category: 'Lighting', reports: 48 },
-  { category: 'Drainage', reports: 39 },
-  { category: 'Water', reports: 32 },
-  { category: 'Waste', reports: 28 },
-]
-
-const priorityData = [
-  { name: 'Critical', value: 9 },
-  { name: 'High', value: 31 },
-  { name: 'Medium', value: 82 },
-  { name: 'Low', value: 126 },
-]
-
-const priorityColors = [
-  '#dc3545',
-  '#ffc107',
-  '#0d6efd',
-  '#6c757d',
-]
-
-const criticalReports: CriticalReport[] = [
-  {
-    reference: 'RH-001245',
-    category: 'Road Damage',
-    location: 'Kigali',
+    reference: 'RPT-2026-0148',
+    category: 'Water Supply',
+    location: 'Kigali City',
     priority: 'Critical',
     status: 'Under Review',
-    age: '2 days',
+    submitted: 'Today, 09:42',
   },
   {
-    reference: 'RH-001251',
-    category: 'Flooding',
-    location: 'Gasabo',
-    priority: 'Critical',
-    status: 'Submitted',
-    age: '1 day',
-  },
-  {
-    reference: 'RH-001263',
-    category: 'Street Lighting',
-    location: 'Kicukiro',
-    priority: 'High',
-    status: 'Under Review',
-    age: '3 days',
-  },
-  {
-    reference: 'RH-001271',
+    reference: 'RPT-2026-0147',
     category: 'Road Damage',
-    location: 'Nyarugenge',
+    location: 'Gasabo District',
     priority: 'High',
     status: 'In Progress',
-    age: '4 days',
+    submitted: 'Today, 08:17',
+  },
+  {
+    reference: 'RPT-2026-0146',
+    category: 'Street Lighting',
+    location: 'Kicukiro District',
+    priority: 'Medium',
+    status: 'In Progress',
+    submitted: 'Yesterday, 16:35',
+  },
+  {
+    reference: 'RPT-2026-0145',
+    category: 'Waste Management',
+    location: 'Nyarugenge District',
+    priority: 'High',
+    status: 'Under Review',
+    submitted: 'Yesterday, 14:12',
+  },
+  {
+    reference: 'RPT-2026-0144',
+    category: 'Drainage',
+    location: 'Gasabo District',
+    priority: 'Medium',
+    status: 'Resolved',
+    submitted: 'Yesterday, 11:28',
   },
 ]
 
-function AdminDashboard() {
+const reportTrend = [
+  { month: 'Mar', submitted: 42, resolved: 31 },
+  { month: 'Apr', submitted: 58, resolved: 44 },
+  { month: 'May', submitted: 64, resolved: 49 },
+  { month: 'Jun', submitted: 71, resolved: 55 },
+  { month: 'Jul', submitted: 83, resolved: 67 },
+  { month: 'Aug', submitted: 96, resolved: 72 },
+]
+
+const reportStatuses = [
+  {
+    name: 'Under Review',
+    value: 64,
+    color: '#ffc107',
+  },
+  {
+    name: 'In Progress',
+    value: 91,
+    color: '#0d6efd',
+  },
+  {
+    name: 'Resolved',
+    value: 93,
+    color: '#198754',
+  },
+]
+
+const priorityReports = recentReports.filter(
+  (report) =>
+    report.priority === 'Critical' ||
+    report.priority === 'High',
+)
+
+function StatCard({
+  label,
+  value,
+  description,
+  icon,
+  iconClass,
+  href,
+}: StatCardProps) {
+  const content = (
+    <div className="card border-0 shadow-sm h-100">
+      <div className="card-body p-4">
+        <div className="d-flex justify-content-between align-items-start gap-3">
+          <div>
+            <div className="small text-secondary mb-2">
+              {label}
+            </div>
+
+            <div className="display-6 fw-bold text-dark">
+              {value}
+            </div>
+
+            <div className="small text-secondary mt-2">
+              {description}
+            </div>
+          </div>
+
+          <div className={`admin-stat-icon ${iconClass}`}>
+            <i
+              className={`bi ${icon}`}
+              aria-hidden="true"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  if (!href) {
+    return content
+  }
+
   return (
-    <div>
-      {/* Page heading */}
-      <div className="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
-        <div>
-          <div className="text-primary small fw-bold text-uppercase mb-1">
-            Administration
+    <Link
+      to={href}
+      className="text-decoration-none"
+    >
+      {content}
+    </Link>
+  )
+}
+
+function getPriorityClass(priority: ReportPriority) {
+  switch (priority) {
+    case 'Critical':
+      return 'text-danger'
+
+    case 'High':
+      return 'text-warning'
+
+    case 'Medium':
+      return 'text-secondary'
+
+    default:
+      return 'text-secondary'
+  }
+}
+
+function getPriorityBadgeClass(priority: ReportPriority) {
+  switch (priority) {
+    case 'Critical':
+      return 'text-bg-danger'
+
+    case 'High':
+      return 'text-bg-warning'
+
+    case 'Medium':
+      return 'text-bg-secondary'
+
+    default:
+      return 'text-bg-secondary'
+  }
+}
+
+function getStatusClass(status: ReportStatus) {
+  switch (status) {
+    case 'Under Review':
+      return 'text-bg-warning'
+
+    case 'In Progress':
+      return 'text-bg-primary'
+
+    case 'Resolved':
+      return 'text-bg-success'
+
+    default:
+      return 'text-bg-secondary'
+  }
+}
+
+function AdminDashboard() {
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<
+    'All' | ReportStatus
+  >('All')
+  const [priorityFilter, setPriorityFilter] = useState<
+    'All' | ReportPriority
+  >('All')
+
+  const filteredReports = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase()
+
+    return recentReports.filter((report) => {
+      const matchesSearch =
+        normalizedSearch === '' ||
+        report.reference.toLowerCase().includes(normalizedSearch) ||
+        report.category.toLowerCase().includes(normalizedSearch) ||
+        report.location.toLowerCase().includes(normalizedSearch)
+
+      const matchesStatus =
+        statusFilter === 'All' ||
+        report.status === statusFilter
+
+      const matchesPriority =
+        priorityFilter === 'All' ||
+        report.priority === priorityFilter
+
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesPriority
+      )
+    })
+  }, [search, statusFilter, priorityFilter])
+
+  const hasActiveFilters =
+    search.trim() !== '' ||
+    statusFilter !== 'All' ||
+    priorityFilter !== 'All'
+
+  const clearFilters = () => {
+    setSearch('')
+    setStatusFilter('All')
+    setPriorityFilter('All')
+  }
+
+  return (
+    <div className="admin-dashboard">
+
+      {/* =====================================================
+          PAGE HEADER
+          ===================================================== */}
+
+      <section className="admin-dashboard-header mb-4">
+        <div className="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+
+          <div>
+            <div className="section-label text-primary mb-2">
+              Administration
+            </div>
+
+            <h1 className="fw-bold mb-2">
+              Dashboard
+            </h1>
+
+            <p className="text-secondary mb-0">
+              Monitor infrastructure reports, identify priority
+              issues, and coordinate administrative response.
+            </p>
           </div>
 
-          <h1 className="h2 fw-bold mb-1">
-            Dashboard
-          </h1>
+          <div className="admin-dashboard-actions d-flex flex-wrap gap-2">
+            <Link
+              to="/admin/reports"
+              className="btn btn-primary"
+            >
+              <i
+                className="bi bi-file-earmark-text me-2"
+                aria-hidden="true"
+              />
+              Manage Reports
+            </Link>
 
-          <p className="text-secondary mb-0">
-            Monitor infrastructure reports, operational priorities,
-            and community issues.
-          </p>
-        </div>
-
-        <div className="d-flex gap-2">
-          <Link
-            to="/admin/ai-analyzer"
-            className="btn btn-outline-primary"
-          >
-            <i className="bi bi-stars me-2" />
-            AI Analyzer
-          </Link>
-
-          <Link
-            to="/admin/reports"
-            className="btn btn-primary"
-          >
-            <i className="bi bi-file-earmark-text me-2" />
-            View Reports
-          </Link>
-        </div>
-      </div>
-
-      {/* KPI cards */}
-      <div className="row g-4 mb-4">
-        {stats.map((stat) => (
-          <div
-            className="col-sm-6 col-xl-3"
-            key={stat.label}
-          >
-            <div className="card border-0 shadow-sm h-100">
-              <div className="card-body p-4">
-                <div className="d-flex justify-content-between align-items-start">
-                  <div>
-                    <div className="text-secondary small mb-2">
-                      {stat.label}
-                    </div>
-
-                    <div className="display-6 fw-bold">
-                      {stat.value}
-                    </div>
-
-                    <div className="small text-secondary mt-2">
-                      {stat.description}
-                    </div>
-                  </div>
-
-                  <div
-                    className={`rounded-3 d-flex align-items-center justify-content-center ${stat.iconClass}`}
-                    style={{
-                      width: '46px',
-                      height: '46px',
-                    }}
-                  >
-                    <i className={`bi ${stat.icon} fs-5`} />
-                  </div>
-                </div>
-              </div>
-            </div>
+            <Link
+              to="/admin/map"
+              className="btn btn-outline-primary"
+            >
+              <i
+                className="bi bi-geo-alt me-2"
+                aria-hidden="true"
+              />
+              View Map
+            </Link>
           </div>
-        ))}
-      </div>
 
-      {/* AI decision-support banner */}
-      <div className="card border-0 shadow-sm mb-4 overflow-hidden">
-        <div className="card-body p-4">
-          <div className="row align-items-center g-4">
-            <div className="col-lg-8">
-              <div className="d-flex align-items-start gap-3">
-                <div
-                  className="rounded-3 bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0"
-                  style={{
-                    width: '48px',
-                    height: '48px',
-                  }}
-                >
-                  <i className="bi bi-stars fs-4" />
-                </div>
-
-                <div>
-                  <div className="d-flex align-items-center gap-2 mb-1">
-                    <h2 className="h5 fw-bold mb-0">
-                      AI Decision-Support
-                    </h2>
-
-                    <span className="badge text-bg-primary">
-                      Advisory
-                    </span>
-                  </div>
-
-                  <p className="mb-2">
-                    The latest analysis identified
-                    <strong> 9 critical areas</strong> requiring
-                    administrative review.
-                  </p>
-
-                  <p className="small text-secondary mb-0">
-                    AI analyzes report patterns, location
-                    concentration, severity, and activity trends.
-                    It does not make final administrative decisions.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-lg-4 text-lg-end">
-              <Link
-                to="/admin/ai-analyzer"
-                className="btn btn-primary"
-              >
-                Review AI Insights
-                <i className="bi bi-arrow-right ms-2" />
-              </Link>
-            </div>
-          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Charts */}
-      <div className="row g-4 mb-4">
-        <div className="col-xl-8">
-          <div className="card border-0 shadow-sm h-100">
-            <div className="card-body p-4">
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                  <h2 className="h5 fw-bold mb-1">
-                    Report Activity
-                  </h2>
 
-                  <p className="small text-secondary mb-0">
-                    Submitted and resolved reports over time
-                  </p>
-                </div>
+      {/* =====================================================
+          STATISTICS
+          ===================================================== */}
 
-                <span className="badge text-bg-light">
-                  Last 6 months
-                </span>
-              </div>
+      <section className="mb-4">
+        <div className="row g-4">
 
-              <div style={{ height: '320px' }}>
-                <ResponsiveContainer
-                  width="100%"
-                  height="100%"
-                >
-                  <LineChart data={reportTrendData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-
-                    <XAxis dataKey="month" />
-
-                    <YAxis />
-
-                    <Tooltip />
-
-                    <Legend />
-
-                    <Line
-                      type="monotone"
-                      dataKey="reports"
-                      name="Reports"
-                      stroke="#0d6efd"
-                      strokeWidth={3}
-                      dot={{ r: 4 }}
-                    />
-
-                    <Line
-                      type="monotone"
-                      dataKey="resolved"
-                      name="Resolved"
-                      stroke="#198754"
-                      strokeWidth={3}
-                      dot={{ r: 4 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+          <div className="col-12 col-sm-6 col-xl-3">
+            <StatCard
+              label="Total Reports"
+              value="248"
+              description="All submitted reports"
+              icon="bi-file-earmark-text"
+              iconClass="admin-stat-primary"
+              href="/admin/reports"
+            />
           </div>
-        </div>
 
-        <div className="col-xl-4">
-          <div className="card border-0 shadow-sm h-100">
-            <div className="card-body p-4">
-              <div className="mb-3">
+          <div className="col-12 col-sm-6 col-xl-3">
+            <StatCard
+              label="Under Review"
+              value="64"
+              description="Awaiting administrative review"
+              icon="bi-hourglass-split"
+              iconClass="admin-stat-warning"
+              href="/admin/reports"
+            />
+          </div>
+
+          <div className="col-12 col-sm-6 col-xl-3">
+            <StatCard
+              label="In Progress"
+              value="91"
+              description="Currently being addressed"
+              icon="bi-arrow-repeat"
+              iconClass="admin-stat-info"
+              href="/admin/reports"
+            />
+          </div>
+
+          <div className="col-12 col-sm-6 col-xl-3">
+            <StatCard
+              label="Resolved"
+              value="93"
+              description="Successfully resolved reports"
+              icon="bi-check-circle"
+              iconClass="admin-stat-success"
+              href="/admin/reports"
+            />
+          </div>
+
+        </div>
+      </section>
+
+
+      {/* =====================================================
+          FILTERS
+          ===================================================== */}
+
+      <section className="mb-4">
+        <div className="card border-0 shadow-sm">
+          <div className="card-body p-4">
+
+            <div className="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-3">
+
+              <div>
                 <h2 className="h5 fw-bold mb-1">
-                  Priority Distribution
+                  Report Overview
                 </h2>
 
                 <p className="small text-secondary mb-0">
-                  Current report severity levels
+                  Quickly search and filter recent infrastructure reports.
                 </p>
               </div>
 
-              <div style={{ height: '280px' }}>
-                <ResponsiveContainer
-                  width="100%"
-                  height="100%"
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-light align-self-start"
+                  onClick={clearFilters}
                 >
-                  <PieChart>
-                    <Pie
-                      data={priorityData}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={65}
-                      outerRadius={100}
-                      paddingAngle={3}
-                    >
-                      {priorityData.map((entry, index) => (
-                        <Cell
-                          key={entry.name}
-                          fill={priorityColors[index]}
-                        />
-                      ))}
-                    </Pie>
+                  <i
+                    className="bi bi-x-circle me-2"
+                    aria-hidden="true"
+                  />
+                  Clear filters
+                </button>
+              )}
 
-                    <Tooltip />
-
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Category chart + AI critical areas */}
-      <div className="row g-4 mb-4">
-        <div className="col-xl-7">
-          <div className="card border-0 shadow-sm h-100">
-            <div className="card-body p-4">
-              <h2 className="h5 fw-bold mb-1">
-                Reports by Category
-              </h2>
+            <div className="row g-3">
 
-              <p className="small text-secondary mb-4">
-                Infrastructure issues reported across the platform
-              </p>
-
-              <div style={{ height: '300px' }}>
-                <ResponsiveContainer
-                  width="100%"
-                  height="100%"
+              <div className="col-12 col-lg-6">
+                <label
+                  htmlFor="dashboard-report-search"
+                  className="visually-hidden"
                 >
-                  <BarChart data={categoryData}>
-                    <CartesianGrid strokeDasharray="3 3" />
+                  Search reports
+                </label>
 
-                    <XAxis dataKey="category" />
-
-                    <YAxis />
-
-                    <Tooltip />
-
-                    <Bar
-                      dataKey="reports"
-                      name="Reports"
-                      fill="#0d6efd"
-                      radius={[6, 6, 0, 0]}
+                <div className="input-group">
+                  <span className="input-group-text bg-white">
+                    <i
+                      className="bi bi-search"
+                      aria-hidden="true"
                     />
-                  </BarChart>
-                </ResponsiveContainer>
+                  </span>
+
+                  <input
+                    id="dashboard-report-search"
+                    type="search"
+                    className="form-control"
+                    placeholder="Search reference, issue, or location..."
+                    value={search}
+                    onChange={(event) =>
+                      setSearch(event.target.value)
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="col-12 col-sm-6 col-lg-3">
+                <label
+                  htmlFor="dashboard-status-filter"
+                  className="visually-hidden"
+                >
+                  Filter by status
+                </label>
+
+                <select
+                  id="dashboard-status-filter"
+                  className="form-select"
+                  value={statusFilter}
+                  onChange={(event) =>
+                    setStatusFilter(
+                      event.target.value as
+                        | 'All'
+                        | ReportStatus,
+                    )
+                  }
+                >
+                  <option value="All">
+                    All statuses
+                  </option>
+                  <option value="Under Review">
+                    Under Review
+                  </option>
+                  <option value="In Progress">
+                    In Progress
+                  </option>
+                  <option value="Resolved">
+                    Resolved
+                  </option>
+                </select>
+              </div>
+
+              <div className="col-12 col-sm-6 col-lg-3">
+                <label
+                  htmlFor="dashboard-priority-filter"
+                  className="visually-hidden"
+                >
+                  Filter by priority
+                </label>
+
+                <select
+                  id="dashboard-priority-filter"
+                  className="form-select"
+                  value={priorityFilter}
+                  onChange={(event) =>
+                    setPriorityFilter(
+                      event.target.value as
+                        | 'All'
+                        | ReportPriority,
+                    )
+                  }
+                >
+                  <option value="All">
+                    All priorities
+                  </option>
+                  <option value="Critical">
+                    Critical
+                  </option>
+                  <option value="High">
+                    High
+                  </option>
+                  <option value="Medium">
+                    Medium
+                  </option>
+                </select>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+
+      {/* =====================================================
+          ANALYTICS
+          ===================================================== */}
+
+      <section className="mb-4">
+        <div className="row g-4">
+
+          <div className="col-12 col-xl-8">
+            <div className="card border-0 shadow-sm h-100">
+              <div className="card-body p-4">
+
+                <div className="d-flex justify-content-between align-items-start gap-3 mb-4">
+
+                  <div>
+                    <h2 className="h5 fw-bold mb-1">
+                      Report Activity
+                    </h2>
+
+                    <p className="small text-secondary mb-0">
+                      Monthly report submissions compared with resolutions.
+                    </p>
+                  </div>
+
+                  <Link
+                    to="/admin/analytics"
+                    className="btn btn-sm btn-light"
+                  >
+                    View analytics
+                  </Link>
+
+                </div>
+
+                <div
+                  style={{
+                    width: '100%',
+                    height: 300,
+                  }}
+                >
+                  <ResponsiveContainer>
+                    <AreaChart data={reportTrend}>
+                      <defs>
+                        <linearGradient
+                          id="submittedArea"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor="#0d6efd"
+                            stopOpacity={0.2}
+                          />
+
+                          <stop
+                            offset="100%"
+                            stopColor="#0d6efd"
+                            stopOpacity={0}
+                          />
+                        </linearGradient>
+
+                        <linearGradient
+                          id="resolvedArea"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor="#198754"
+                            stopOpacity={0.18}
+                          />
+
+                          <stop
+                            offset="100%"
+                            stopColor="#198754"
+                            stopOpacity={0}
+                          />
+                        </linearGradient>
+                      </defs>
+
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        vertical={false}
+                      />
+
+                      <XAxis
+                        dataKey="month"
+                        axisLine={false}
+                        tickLine={false}
+                      />
+
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                      />
+
+                      <Tooltip />
+
+                      <Area
+                        type="monotone"
+                        dataKey="submitted"
+                        name="Submitted"
+                        stroke="#0d6efd"
+                        strokeWidth={2.5}
+                        fill="url(#submittedArea)"
+                      />
+
+                      <Area
+                        type="monotone"
+                        dataKey="resolved"
+                        name="Resolved"
+                        stroke="#198754"
+                        strokeWidth={2.5}
+                        fill="url(#resolvedArea)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="col-xl-5">
-          <div className="card border-0 shadow-sm h-100">
-            <div className="card-body p-4">
-              <div className="d-flex justify-content-between align-items-center mb-4">
+
+          <div className="col-12 col-xl-4">
+            <div className="card border-0 shadow-sm h-100">
+              <div className="card-body p-4">
+
+                <h2 className="h5 fw-bold mb-1">
+                  Current Status
+                </h2>
+
+                <p className="small text-secondary mb-3">
+                  Distribution of all submitted reports.
+                </p>
+
+                <div
+                  className="position-relative"
+                  style={{
+                    height: 200,
+                  }}
+                >
+                  <ResponsiveContainer>
+                    <PieChart>
+                      <Pie
+                        data={reportStatuses}
+                        dataKey="value"
+                        nameKey="name"
+                        innerRadius={58}
+                        outerRadius={82}
+                        paddingAngle={3}
+                      >
+                        {reportStatuses.map((item) => (
+                          <Cell
+                            key={item.name}
+                            fill={item.color}
+                          />
+                        ))}
+                      </Pie>
+
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+
+                  <div className="admin-donut-center">
+                    <strong>
+                      248
+                    </strong>
+
+                    <span>
+                      Total reports
+                    </span>
+                  </div>
+                </div>
+
+                <div className="d-grid gap-3 mt-3">
+                  {reportStatuses.map((item) => (
+                    <div
+                      key={item.name}
+                      className="d-flex justify-content-between align-items-center"
+                    >
+                      <div className="d-flex align-items-center gap-2">
+                        <span
+                          className="admin-status-dot"
+                          style={{
+                            backgroundColor: item.color,
+                          }}
+                        />
+
+                        <span className="small">
+                          {item.name}
+                        </span>
+                      </div>
+
+                      <strong>
+                        {item.value}
+                      </strong>
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+
+      {/* =====================================================
+          ATTENTION REQUIRED
+          ===================================================== */}
+
+      <section className="mb-4">
+        <div className="card border-0 shadow-sm">
+          <div className="card-body p-4">
+
+            <div className="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+
+              <div>
+                <div className="d-flex align-items-center gap-2">
+
+                  <h2 className="h5 fw-bold mb-1">
+                    Requires Attention
+                  </h2>
+
+                  <span className="badge text-bg-danger">
+                    {priorityReports.length}
+                  </span>
+
+                </div>
+
+                <p className="small text-secondary mb-0">
+                  Critical and high-priority reports requiring administrative review.
+                </p>
+              </div>
+
+              <Link
+                to="/admin/reports"
+                className="btn btn-sm btn-outline-primary align-self-start"
+              >
+                View all reports
+              </Link>
+
+            </div>
+
+            <div className="row g-3">
+
+              {priorityReports.slice(0, 3).map((report) => (
+                <div
+                  key={report.reference}
+                  className="col-12 col-lg-4"
+                >
+                  <Link
+                    to={`/admin/reports/${report.reference}`}
+                    className="admin-alert-card h-100"
+                  >
+                    <div
+                      className={`admin-alert-icon ${
+                        report.priority === 'Critical'
+                          ? 'admin-alert-danger'
+                          : 'admin-alert-warning'
+                      }`}
+                    >
+                      <i
+                        className={
+                          report.category === 'Water Supply'
+                            ? 'bi bi-droplet'
+                            : 'bi bi-exclamation-triangle'
+                        }
+                        aria-hidden="true"
+                      />
+                    </div>
+
+                    <div className="flex-grow-1 min-width-0">
+
+                      <div className="fw-semibold text-truncate">
+                        {report.category}
+                      </div>
+
+                      <div className="small text-secondary">
+                        {report.location} • {report.reference}
+                      </div>
+
+                      <div className="mt-2">
+                        <span
+                          className={`badge ${getPriorityBadgeClass(
+                            report.priority,
+                          )}`}
+                        >
+                          {report.priority}
+                        </span>
+                      </div>
+
+                    </div>
+
+                    <i
+                      className="bi bi-chevron-right text-secondary"
+                      aria-hidden="true"
+                    />
+                  </Link>
+                </div>
+              ))}
+
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+
+      {/* =====================================================
+          RECENT REPORTS
+          ===================================================== */}
+
+      <section className="mb-4">
+        <div className="card border-0 shadow-sm">
+
+          <div className="card-body p-0">
+
+            <div className="p-4 border-bottom">
+              <div className="d-flex flex-column flex-md-row justify-content-between gap-3">
+
                 <div>
                   <h2 className="h5 fw-bold mb-1">
-                    Critical Areas
+                    Recent Reports
                   </h2>
 
                   <p className="small text-secondary mb-0">
-                    AI-detected areas for review
+                    Latest infrastructure issues submitted by citizens.
                   </p>
                 </div>
 
                 <Link
-                  to="/admin/ai-analyzer"
-                  className="small text-decoration-none"
+                  to="/admin/reports"
+                  className="btn btn-sm btn-outline-primary align-self-start"
                 >
-                  View all
+                  Manage all reports
                 </Link>
-              </div>
 
-              <div className="list-group list-group-flush">
-                <div className="list-group-item px-0">
-                  <div className="d-flex justify-content-between gap-3">
-                    <div>
-                      <div className="fw-semibold">
-                        Road Infrastructure
-                      </div>
-
-                      <div className="small text-secondary">
-                        Kigali
-                      </div>
-                    </div>
-
-                    <span className="badge text-bg-danger align-self-start">
-                      Critical
-                    </span>
-                  </div>
-
-                  <div className="small text-secondary mt-2">
-                    14 related reports detected in a concentrated
-                    area.
-                  </div>
-                </div>
-
-                <div className="list-group-item px-0">
-                  <div className="d-flex justify-content-between gap-3">
-                    <div>
-                      <div className="fw-semibold">
-                        Drainage
-                      </div>
-
-                      <div className="small text-secondary">
-                        Gasabo
-                      </div>
-                    </div>
-
-                    <span className="badge text-bg-danger align-self-start">
-                      Critical
-                    </span>
-                  </div>
-
-                  <div className="small text-secondary mt-2">
-                    Increasing reports suggest a developing
-                    infrastructure concern.
-                  </div>
-                </div>
-
-                <div className="list-group-item px-0">
-                  <div className="d-flex justify-content-between gap-3">
-                    <div>
-                      <div className="fw-semibold">
-                        Street Lighting
-                      </div>
-
-                      <div className="small text-secondary">
-                        Kicukiro
-                      </div>
-                    </div>
-
-                    <span className="badge text-bg-warning align-self-start">
-                      High
-                    </span>
-                  </div>
-
-                  <div className="small text-secondary mt-2">
-                    Multiple reports have been submitted recently.
-                  </div>
-                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Reports requiring attention */}
-      <div className="card border-0 shadow-sm">
-        <div className="card-body p-4">
-          <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
-            <div>
-              <h2 className="h5 fw-bold mb-1">
-                Reports Requiring Attention
-              </h2>
+            <div className="table-responsive">
 
-              <p className="small text-secondary mb-0">
-                Highest-priority reports currently awaiting action
-              </p>
-            </div>
+              <table className="table align-middle mb-0">
 
-            <Link
-              to="/admin/reports"
-              className="btn btn-sm btn-outline-primary"
-            >
-              Manage Reports
-            </Link>
-          </div>
+                <thead>
+                  <tr>
 
-          <div className="table-responsive">
-            <table className="table align-middle mb-0">
-              <thead>
-                <tr>
-                  <th>Reference</th>
-                  <th>Issue</th>
-                  <th>Location</th>
-                  <th>Priority</th>
-                  <th>Status</th>
-                  <th>Age</th>
-                  <th />
-                </tr>
-              </thead>
+                    <th className="ps-4">
+                      Reference
+                    </th>
 
-              <tbody>
-                {criticalReports.map((report) => (
-                  <tr key={report.reference}>
-                    <td className="fw-semibold">
-                      {report.reference}
-                    </td>
+                    <th>
+                      Issue
+                    </th>
 
-                    <td>{report.category}</td>
+                    <th>
+                      Location
+                    </th>
 
-                    <td>{report.location}</td>
+                    <th>
+                      Priority
+                    </th>
 
-                    <td>
-                      <span
-                        className={`badge ${
-                          report.priority === 'Critical'
-                            ? 'text-bg-danger'
-                            : report.priority === 'High'
-                              ? 'text-bg-warning'
-                              : 'text-bg-primary'
-                        }`}
-                      >
-                        {report.priority}
-                      </span>
-                    </td>
+                    <th>
+                      Status
+                    </th>
 
-                    <td>
-                      <span className="badge text-bg-light border">
-                        {report.status}
-                      </span>
-                    </td>
+                    <th>
+                      Submitted
+                    </th>
 
-                    <td className="text-secondary">
-                      {report.age}
-                    </td>
+                    <th className="pe-4 text-end">
+                      Action
+                    </th>
 
-                    <td className="text-end">
-                      <Link
-                        to={`/admin/reports/${report.reference}`}
-                        className="btn btn-sm btn-outline-primary"
-                      >
-                        Review
-                      </Link>
-                    </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody>
+
+                  {filteredReports.map((report) => (
+                    <tr key={report.reference}>
+
+                      <td className="ps-4">
+                        <Link
+                          to={`/admin/reports/${report.reference}`}
+                          className="fw-semibold"
+                        >
+                          {report.reference}
+                        </Link>
+                      </td>
+
+                      <td>
+                        <div className="fw-medium">
+                          {report.category}
+                        </div>
+                      </td>
+
+                      <td>
+                        <span className="small text-secondary">
+                          <i
+                            className="bi bi-geo-alt me-1"
+                            aria-hidden="true"
+                          />
+
+                          {report.location}
+                        </span>
+                      </td>
+
+                      <td>
+                        <span
+                          className={`small fw-semibold ${getPriorityClass(
+                            report.priority,
+                          )}`}
+                        >
+                          {report.priority}
+                        </span>
+                      </td>
+
+                      <td>
+                        <span
+                          className={`badge ${getStatusClass(
+                            report.status,
+                          )}`}
+                        >
+                          {report.status}
+                        </span>
+                      </td>
+
+                      <td className="small text-secondary">
+                        {report.submitted}
+                      </td>
+
+                      <td className="pe-4 text-end">
+                        <Link
+                          to={`/admin/reports/${report.reference}`}
+                          className="btn btn-sm btn-light"
+                          aria-label={`View ${report.reference}`}
+                        >
+                          <i
+                            className="bi bi-arrow-right"
+                            aria-hidden="true"
+                          />
+                        </Link>
+                      </td>
+
+                    </tr>
+                  ))}
+
+                  {filteredReports.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={7}
+                        className="text-center py-5"
+                      >
+                        <div className="text-secondary mb-2">
+                          <i className="bi bi-search fs-3" />
+                        </div>
+
+                        <div className="fw-semibold">
+                          No reports found
+                        </div>
+
+                        <div className="small text-secondary mt-1">
+                          Try changing your search or filters.
+                        </div>
+
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-primary mt-3"
+                          onClick={clearFilters}
+                        >
+                          Clear filters
+                        </button>
+                      </td>
+                    </tr>
+                  )}
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+            <div className="px-4 py-3 border-top">
+              <div className="small text-secondary">
+                Showing{' '}
+                <strong className="text-dark">
+                  {filteredReports.length}
+                </strong>{' '}
+                of{' '}
+                <strong className="text-dark">
+                  {recentReports.length}
+                </strong>{' '}
+                recent reports
+              </div>
+            </div>
+
           </div>
         </div>
-      </div>
+      </section>
+
+
+      {/* =====================================================
+          AI DECISION SUPPORT
+          ===================================================== */}
+
+      <section>
+        <div className="card border-0 shadow-sm admin-ai-summary">
+
+          <div className="card-body p-4">
+
+            <div className="row align-items-center g-4">
+
+              <div className="col-12 col-lg-8">
+
+                <div className="d-flex gap-3">
+
+                  <div className="admin-insight-icon flex-shrink-0">
+                    <i
+                      className="bi bi-stars"
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  <div>
+
+                    <div className="d-flex align-items-center gap-2 mb-1 flex-wrap">
+
+                      <h2 className="h5 fw-bold mb-0">
+                        AI Analyzer
+                      </h2>
+
+                      <span className="badge bg-primary-subtle text-primary">
+                        Decision Support
+                      </span>
+
+                    </div>
+
+                    <p className="small text-secondary mb-2">
+                      Analyze report patterns, identify high-risk
+                      areas, detect clusters, and prioritize issues
+                      for human review.
+                    </p>
+
+                    <p className="small text-secondary mb-0">
+                      AI recommendations do not approve, reject,
+                      assign, or make operational decisions.
+                      Administrators remain responsible for final
+                      decisions.
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div className="col-12 col-lg-4 text-lg-end">
+
+                <Link
+                  to="/admin/ai-analyzer"
+                  className="btn btn-primary"
+                >
+                  Open AI Analyzer
+
+                  <i
+                    className="bi bi-arrow-right ms-2"
+                    aria-hidden="true"
+                  />
+                </Link>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
     </div>
   )
 }

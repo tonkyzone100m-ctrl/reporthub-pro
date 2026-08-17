@@ -1,57 +1,89 @@
+﻿/* =========================================================
+   ReportHub
+   Global Design System + Admin Portal
+   ========================================================= */
+
 /* =========================================================
-   ReportHub — Global Styles
+   1. DESIGN TOKENS
    ========================================================= */
 
 :root {
+  /* Brand */
   --rh-primary: #0d6efd;
-  --rh-primary-dark: #0b5ed7;
+  --rh-primary-dark: #0a58ca;
   --rh-primary-soft: #eaf3ff;
 
-  --rh-text: #212529;
-  --rh-text-muted: #6c757d;
-
-  --rh-background: #ffffff;
-  --rh-surface: #f8f9fa;
-  --rh-border: #dee2e6;
-
+  /* Semantic */
   --rh-success: #198754;
-  --rh-warning: #ffc107;
-  --rh-danger: #dc3545;
+  --rh-success-soft: #e8f5ee;
 
-  --rh-radius: 12px;
-  --rh-radius-lg: 16px;
+  --rh-warning: #f59f00;
+  --rh-warning-soft: #fff4d6;
+
+  --rh-danger: #dc3545;
+  --rh-danger-soft: #fdebec;
+
+  --rh-info: #0dcaf0;
+  --rh-info-soft: #e8f9fc;
+
+  /* Text */
+  --rh-text: #1f2937;
+  --rh-text-secondary: #4b5563;
+  --rh-text-muted: #6b7280;
+  --rh-text-light: #9ca3af;
+
+  /* Backgrounds */
+  --rh-bg: #f5f7fa;
+  --rh-surface: #ffffff;
+  --rh-surface-soft: #f8fafc;
+  --rh-surface-hover: #f3f6fa;
+
+  /* Borders */
+  --rh-border: #e2e8f0;
+  --rh-border-light: #edf1f5;
+  --rh-border-dark: #cbd5e1;
+
+  /* Shadows */
+  --rh-shadow-xs:
+    0 1px 2px rgba(15, 23, 42, 0.04);
 
   --rh-shadow-sm:
-    0 2px 8px rgba(0, 0, 0, 0.06);
+    0 2px 6px rgba(15, 23, 42, 0.06);
 
   --rh-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.08);
+    0 6px 18px rgba(15, 23, 42, 0.07);
 
   --rh-shadow-lg:
-    0 16px 40px rgba(0, 0, 0, 0.1);
+    0 16px 40px rgba(15, 23, 42, 0.12);
 
+  /* Typography */
   --rh-font:
     Inter,
+    system-ui,
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
-    Roboto,
-    Helvetica,
-    Arial,
     sans-serif;
 
-  font-family: var(--rh-font);
-  color: var(--rh-text);
-  background: var(--rh-background);
+  /* Radius */
+  --rh-radius-xs: 6px;
+  --rh-radius-sm: 8px;
+  --rh-radius-md: 12px;
+  --rh-radius-lg: 16px;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Admin layout */
+  --rh-sidebar-width: 260px;
+  --rh-header-height: 64px;
+
+  /* Motion */
+  --rh-transition-fast: 0.15s ease;
+  --rh-transition: 0.2s ease;
+  --rh-transition-slow: 0.3s ease;
 }
 
+
 /* =========================================================
-   Base
+   2. GLOBAL RESET
    ========================================================= */
 
 *,
@@ -61,28 +93,46 @@
 }
 
 html {
+  min-width: 320px;
   scroll-behavior: smooth;
 }
 
 body {
-  margin: 0;
   min-width: 320px;
   min-height: 100vh;
 
+  margin: 0;
+
   font-family: var(--rh-font);
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.5;
 
   color: var(--rh-text);
-  background: var(--rh-background);
+  background: var(--rh-bg);
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
   min-height: 100vh;
 }
 
+img,
+svg {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+
 /* =========================================================
-   Typography
+   3. TYPOGRAPHY
    ========================================================= */
 
 h1,
@@ -91,441 +141,1318 @@ h3,
 h4,
 h5,
 h6 {
+  margin-top: 0;
+
   color: var(--rh-text);
+
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 p {
-  line-height: 1.7;
+  margin-top: 0;
 }
-
-.text-secondary {
-  color: var(--rh-text-muted) !important;
-}
-
-/* =========================================================
-   Links
-   ========================================================= */
 
 a {
   color: var(--rh-primary);
   text-decoration: none;
+
+  transition:
+    color var(--rh-transition-fast);
 }
 
 a:hover {
   color: var(--rh-primary-dark);
 }
 
+
 /* =========================================================
-   Buttons
+   4. SELECTION
    ========================================================= */
 
-.btn {
-  border-radius: 8px;
-  font-weight: 600;
+::selection {
+  color: #ffffff;
+  background: var(--rh-primary);
+}
+
+
+/* =========================================================
+   5. SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f3f5;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #c5ccd4;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9da6b0;
+}
+
+
+/* =========================================================
+   6. GLOBAL UTILITIES
+   ========================================================= */
+
+.rh-surface {
+  background: var(--rh-surface);
+}
+
+.rh-text {
+  color: var(--rh-text);
+}
+
+.rh-text-muted {
+  color: var(--rh-text-muted);
+}
+
+.rh-primary {
+  color: var(--rh-primary);
+}
+
+.rh-success {
+  color: var(--rh-success);
+}
+
+.rh-warning {
+  color: var(--rh-warning);
+}
+
+.rh-danger {
+  color: var(--rh-danger);
+}
+
+.rh-shadow-sm {
+  box-shadow: var(--rh-shadow-sm);
+}
+
+.rh-shadow {
+  box-shadow: var(--rh-shadow);
+}
+
+.rh-shadow-lg {
+  box-shadow: var(--rh-shadow-lg);
+}
+
+
+/* =========================================================
+   7. COMMON CARDS
+   ========================================================= */
+
+.rh-card {
+  border: 1px solid var(--rh-border);
+  border-radius: var(--rh-radius-md);
+
+  background: var(--rh-surface);
+
+  box-shadow: var(--rh-shadow-sm);
+}
+
+.rh-card-hover {
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    background-color 0.2s ease,
-    border-color 0.2s ease;
+    transform var(--rh-transition),
+    box-shadow var(--rh-transition),
+    border-color var(--rh-transition);
 }
 
-.btn:hover {
-  transform: translateY(-1px);
+.rh-card-hover:hover {
+  border-color: var(--rh-border-dark);
+
+  transform: translateY(-2px);
+
+  box-shadow: var(--rh-shadow);
 }
 
-.btn:active {
-  transform: translateY(0);
-}
-
-.btn-primary {
-  background-color: var(--rh-primary);
-  border-color: var(--rh-primary);
-}
-
-.btn-primary:hover {
-  background-color: var(--rh-primary-dark);
-  border-color: var(--rh-primary-dark);
-  box-shadow: 0 6px 16px rgba(13, 110, 253, 0.2);
-}
-
-.btn-outline-secondary {
-  color: var(--rh-text);
-  border-color: var(--rh-border);
-}
-
-.btn-outline-secondary:hover {
-  color: var(--rh-text);
-  background-color: var(--rh-surface);
-  border-color: #adb5bd;
-}
 
 /* =========================================================
-   Cards
-   ========================================================= */
-
-.card {
-  border-radius: var(--rh-radius);
-  border-color: var(--rh-border);
-}
-
-.card.shadow-sm {
-  box-shadow: var(--rh-shadow-sm) !important;
-}
-
-.card:hover {
-  box-shadow: var(--rh-shadow) !important;
-}
-
-/* =========================================================
-   Forms
+   8. FORMS
    ========================================================= */
 
 .form-label {
+  margin-bottom: 0.4rem;
+
   color: var(--rh-text);
+
+  font-weight: 600;
 }
 
 .form-control,
 .form-select {
+  min-height: 42px;
+
   border-color: var(--rh-border);
-  border-radius: 8px;
+
+  border-radius: var(--rh-radius-sm);
+
+  color: var(--rh-text);
+
+  background-color: var(--rh-surface);
+
+  transition:
+    border-color var(--rh-transition-fast),
+    box-shadow var(--rh-transition-fast);
+}
+
+.form-control::placeholder {
+  color: #9aa3ad;
+}
+
+.form-control:hover,
+.form-select:hover {
+  border-color: var(--rh-border-dark);
 }
 
 .form-control:focus,
 .form-select:focus {
   border-color: var(--rh-primary);
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.12);
+
+  box-shadow:
+    0 0 0 0.2rem rgba(13, 110, 253, 0.12);
 }
 
-.form-control::placeholder {
-  color: #adb5bd;
+.input-group-text {
+  border-color: var(--rh-border);
 }
 
-textarea.form-control {
-  resize: vertical;
-  min-height: 140px;
-}
 
 /* =========================================================
-   ReportHub Hero
+   9. BUTTONS
    ========================================================= */
 
-.reporthub-hero {
+.btn {
+  min-height: 40px;
+
+  border-radius: var(--rh-radius-sm);
+
+  font-weight: 600;
+
+  transition:
+    transform var(--rh-transition-fast),
+    box-shadow var(--rh-transition-fast),
+    background-color var(--rh-transition-fast),
+    border-color var(--rh-transition-fast);
+}
+
+.btn-primary {
+  border-color: var(--rh-primary);
+
+  background-color: var(--rh-primary);
+}
+
+.btn-primary:hover {
+  border-color: var(--rh-primary-dark);
+
+  background-color: var(--rh-primary-dark);
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 4px 10px rgba(13, 110, 253, 0.18);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-secondary:hover {
+  transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   10. ADMIN LAYOUT
+   ========================================================= */
+
+.admin-layout {
+  min-height: 100vh;
+
+  display: flex;
+
+  background: var(--rh-bg);
+}
+
+
+/* =========================================================
+   ADMIN MAIN
+   ========================================================= */
+
+.admin-main {
+  min-width: 0;
+  min-height: 100vh;
+
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  margin-left: var(--rh-sidebar-width);
+}
+
+
+/* =========================================================
+   ADMIN CONTENT
+   ========================================================= */
+
+.admin-content {
+  width: 100%;
+  min-width: 0;
+
+  flex: 1;
+
+  padding: 1.5rem;
+}
+
+@media (min-width: 1200px) {
+  .admin-content {
+    padding: 1.75rem 2rem;
+  }
+}
+
+
+/* =========================================================
+   11. ADMIN SIDEBAR
+   ========================================================= */
+
+.admin-sidebar {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+  bottom: 0;
+
+  z-index: 1030;
+
+  width: var(--rh-sidebar-width);
+
+  display: flex;
+  flex-direction: column;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  background: var(--rh-surface);
+
+  border-right: 1px solid var(--rh-border);
+
+  scrollbar-width: thin;
+}
+
+
+/* =========================================================
+   SIDEBAR BRAND
+   ========================================================= */
+
+.admin-brand {
+  min-height: var(--rh-header-height);
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 0.75rem;
+
+  padding: 0.9rem 1.15rem;
+
+  border-bottom: 1px solid var(--rh-border-light);
+}
+
+.admin-brand-icon {
+  width: 40px;
+  height: 40px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 40px;
+
+  border-radius: 10px;
+
+  color: #ffffff;
+
+  background: var(--rh-primary);
+
+  font-size: 1.05rem;
+
+  box-shadow:
+    0 4px 10px rgba(13, 110, 253, 0.18);
+}
+
+.admin-brand-name {
+  color: var(--rh-text);
+
+  font-size: 1rem;
+  font-weight: 750;
+
+  line-height: 1.2;
+}
+
+.admin-brand-subtitle {
+  margin-top: 2px;
+
+  color: var(--rh-text-muted);
+
+  font-size: 0.68rem;
+
+  line-height: 1.2;
+}
+
+
+/* =========================================================
+   SIDEBAR NAVIGATION
+   ========================================================= */
+
+.admin-sidebar-nav {
+  flex: 1;
+
+  padding: 1rem 0.75rem;
+}
+
+.admin-nav-section-label {
+  padding: 0 0.7rem;
+
+  margin-bottom: 0.5rem;
+
+  color: var(--rh-text-light);
+
+  font-size: 0.67rem;
+
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+
+  text-transform: uppercase;
+}
+
+.admin-nav-link {
+  min-height: 44px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 0.7rem;
+
+  padding: 0.65rem 0.75rem;
+
+  margin-bottom: 3px;
+
+  border: 1px solid transparent;
+
+  border-radius: var(--rh-radius-sm);
+
+  color: var(--rh-text-secondary);
+
+  font-size: 0.875rem;
+
+  font-weight: 500;
+
+  text-decoration: none;
+
+  transition:
+    color var(--rh-transition-fast),
+    background-color var(--rh-transition-fast),
+    border-color var(--rh-transition-fast);
+}
+
+.admin-nav-link:hover {
+  color: var(--rh-text);
+
+  background: var(--rh-surface-hover);
+}
+
+.admin-nav-link.active {
+  color: var(--rh-primary);
+
+  background: var(--rh-primary-soft);
+
+  border-color: rgba(13, 110, 253, 0.08);
+
+  font-weight: 650;
+}
+
+.admin-nav-icon {
+  width: 22px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 22px;
+
+  font-size: 1rem;
+}
+
+.admin-nav-label {
+  min-width: 0;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   SIDEBAR FOOTER
+   ========================================================= */
+
+.admin-sidebar-footer {
+  padding: 0.85rem 0.75rem;
+
+  border-top: 1px solid var(--rh-border-light);
+}
+
+.admin-security-badge {
+  display: flex;
+
+  align-items: center;
+
+  gap: 0.65rem;
+
+  padding: 0.7rem;
+
+  border: 1px solid var(--rh-border);
+
+  border-radius: var(--rh-radius-sm);
+
+  background: var(--rh-surface-soft);
+}
+
+.admin-security-badge > i {
+  width: 34px;
+  height: 34px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 34px;
+
+  border-radius: 8px;
+
+  color: var(--rh-success);
+
+  background: var(--rh-success-soft);
+}
+
+
+/* =========================================================
+   SIDEBAR SCROLLBAR
+   ========================================================= */
+
+.admin-sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.admin-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+
+  background: #d1d5db;
+}
+
+
+/* =========================================================
+   12. DASHBOARD
+   ========================================================= */
+
+.admin-dashboard {
+  width: 100%;
+
+  max-width: 100%;
+}
+
+.admin-dashboard-header {
+  padding-bottom: 0.25rem;
+}
+
+.admin-dashboard-header h1 {
+  letter-spacing: -0.02em;
+}
+
+.admin-dashboard-actions {
+  flex-shrink: 0;
+}
+
+.admin-dashboard-actions .btn {
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   KPI CARDS
+   ========================================================= */
+
+.admin-kpi-card {
+  height: 100%;
+
+  overflow: hidden;
+
+  border: 1px solid var(--rh-border) !important;
+
+  border-radius: var(--rh-radius-md) !important;
+
+  background: var(--rh-surface);
+
+  box-shadow: var(--rh-shadow-sm) !important;
+
+  transition:
+    transform var(--rh-transition),
+    box-shadow var(--rh-transition),
+    border-color var(--rh-transition);
+}
+
+.admin-kpi-card:hover {
+  border-color: var(--rh-border-dark) !important;
+
+  transform: translateY(-2px);
+
+  box-shadow: var(--rh-shadow) !important;
+}
+
+.admin-kpi-card .card-body {
+  min-width: 0;
+}
+
+.admin-stat-icon {
+  width: 48px;
+  height: 48px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 48px;
+
+  border-radius: 12px;
+
+  font-size: 1.15rem;
+}
+
+.admin-stat-primary {
+  color: var(--rh-primary);
+
+  background: var(--rh-primary-soft);
+}
+
+.admin-stat-warning {
+  color: #8a6100;
+
+  background: var(--rh-warning-soft);
+}
+
+.admin-stat-info {
+  color: #087990;
+
+  background: var(--rh-info-soft);
+}
+
+.admin-stat-success {
+  color: var(--rh-success);
+
+  background: var(--rh-success-soft);
+}
+
+
+/* =========================================================
+   13. REPORT CONTROLS
+   ========================================================= */
+
+.admin-report-controls {
+  position: relative;
+
+  z-index: 2;
+
+  border: 1px solid var(--rh-border) !important;
+
+  border-radius: var(--rh-radius-md) !important;
+
+  background: var(--rh-surface);
+
+  box-shadow: var(--rh-shadow-sm) !important;
+}
+
+.admin-report-controls .input-group-text {
+  background: var(--rh-surface);
+}
+
+.admin-report-controls .form-control,
+.admin-report-controls .form-select {
+  min-height: 44px;
+}
+
+
+/* =========================================================
+   14. DASHBOARD CARDS
+   ========================================================= */
+
+.admin-dashboard .card {
+  border-color: var(--rh-border) !important;
+
+  border-radius: var(--rh-radius-md) !important;
+
+  background: var(--rh-surface);
+
+  box-shadow: var(--rh-shadow-sm) !important;
+}
+
+.admin-dashboard .card-body {
+  min-width: 0;
+}
+
+
+/* =========================================================
+   15. TABLES
+   ========================================================= */
+
+.admin-dashboard .table {
+  --bs-table-bg: transparent;
+
+  margin-bottom: 0;
+}
+
+.admin-dashboard .table thead th {
+  padding-top: 0.8rem;
+  padding-bottom: 0.8rem;
+
+  color: var(--rh-text-muted);
+
+  background: var(--rh-surface-soft);
+
+  border-bottom-color: var(--rh-border);
+
+  font-size: 0.7rem;
+
+  font-weight: 700;
+
+  letter-spacing: 0.045em;
+
+  text-transform: uppercase;
+
+  white-space: nowrap;
+}
+
+.admin-dashboard .table thead th:first-child {
+  border-top-left-radius: 8px;
+}
+
+.admin-dashboard .table thead th:last-child {
+  border-top-right-radius: 8px;
+}
+
+.admin-dashboard .table tbody td {
+  padding-top: 0.95rem;
+  padding-bottom: 0.95rem;
+
+  vertical-align: middle;
+
+  border-color: var(--rh-border-light);
+
+  color: var(--rh-text);
+}
+
+.admin-dashboard .table tbody tr {
+  transition:
+    background-color var(--rh-transition-fast);
+}
+
+.admin-dashboard .table tbody tr:hover {
+  background: #fafcff;
+}
+
+.admin-dashboard .table-responsive {
+  width: 100%;
+
+  overflow-x: auto;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+
+/* =========================================================
+   16. REPORT STATUS
+   ========================================================= */
+
+.admin-status-dot {
+  width: 9px;
+  height: 9px;
+
+  display: inline-block;
+
+  flex: 0 0 9px;
+
+  border-radius: 50%;
+}
+
+
+/* =========================================================
+   17. DONUT CHART
+   ========================================================= */
+
+.admin-donut-center {
+  position: absolute;
+
+  inset: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  pointer-events: none;
+}
+
+.admin-donut-center strong {
+  color: var(--rh-text);
+
+  font-size: 1.55rem;
+
+  line-height: 1;
+}
+
+.admin-donut-center span {
+  margin-top: 5px;
+
+  color: var(--rh-text-muted);
+
+  font-size: 0.72rem;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   18. PRIORITY / ALERT CARDS
+   ========================================================= */
+
+.admin-alert-card {
+  min-width: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 0.75rem;
+
+  padding: 0.9rem;
+
+  border: 1px solid var(--rh-border);
+
+  border-radius: var(--rh-radius-sm);
+
+  color: var(--rh-text);
+
+  background: var(--rh-surface);
+
+  text-decoration: none;
+
+  transition:
+    transform var(--rh-transition-fast),
+    border-color var(--rh-transition-fast),
+    background-color var(--rh-transition-fast),
+    box-shadow var(--rh-transition-fast);
+}
+
+.admin-alert-card:hover {
+  color: var(--rh-text);
+
+  border-color: var(--rh-border-dark);
+
+  background: #fbfcfe;
+
+  transform: translateY(-1px);
+
+  box-shadow: var(--rh-shadow-xs);
+}
+
+.admin-alert-card .min-width-0 {
+  min-width: 0;
+}
+
+.admin-alert-icon {
+  width: 40px;
+  height: 40px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 40px;
+
+  border-radius: 10px;
+}
+
+.admin-alert-danger {
+  color: var(--rh-danger);
+
+  background: var(--rh-danger-soft);
+}
+
+.admin-alert-warning {
+  color: #8a6100;
+
+  background: var(--rh-warning-soft);
+}
+
+.admin-alert-info {
+  color: var(--rh-primary);
+
+  background: var(--rh-primary-soft);
+}
+
+
+/* =========================================================
+   19. AI ANALYZER SUMMARY
+   ========================================================= */
+
+.admin-ai-summary {
+  overflow: hidden;
+
+  border: 1px solid #dce9fb !important;
+
   background:
     linear-gradient(
       135deg,
-      #f8fbff 0%,
-      #ffffff 55%,
-      #f4f8ff 100%
+      #ffffff 0%,
+      #f7fbff 100%
     );
 }
 
-.reporthub-hero h1 {
-  letter-spacing: -0.8px;
+.admin-insight-icon {
+  width: 44px;
+  height: 44px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 44px;
+
+  border-radius: 11px;
+
+  color: var(--rh-primary);
+
+  background: var(--rh-primary-soft);
+
+  font-size: 1.15rem;
 }
 
-.reporthub-hero .lead {
-  max-width: 720px;
+.admin-insight-item {
+  padding: 1rem 0;
+
+  border-bottom: 1px solid var(--rh-border);
 }
+
+.admin-insight-item:last-child {
+  border-bottom: 0;
+}
+
 
 /* =========================================================
-   Feature Cards
+   20. SYSTEM HEALTH
    ========================================================= */
 
-.reporthub-feature {
-  height: 100%;
-  padding: 1.5rem;
-  background: #ffffff;
+.admin-health-dot {
+  width: 9px;
+  height: 9px;
+
+  display: inline-block;
+
+  flex: 0 0 9px;
+
+  border-radius: 50%;
+
+  background: var(--rh-success);
+
+  box-shadow:
+    0 0 0 4px rgba(25, 135, 84, 0.1);
+}
+
+.admin-health-summary {
+  padding: 1rem;
+
+  border: 1px solid var(--rh-border-light);
+
+  border-radius: var(--rh-radius-sm);
+
+  background: var(--rh-surface-soft);
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   21. QUICK ACTIONS
+   ========================================================= */
+
+.admin-quick-action {
+  min-height: 86px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.45rem;
+
+  padding: 0.75rem;
+
   border: 1px solid var(--rh-border);
-  border-radius: var(--rh-radius);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
 
-.reporthub-feature:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--rh-shadow);
-}
+  border-radius: var(--rh-radius-sm);
 
-/* =========================================================
-   Process Steps
-   ========================================================= */
+  color: var(--rh-text);
 
-.reporthub-step-number {
-  width: 42px;
-  height: 42px;
+  background: var(--rh-surface);
 
-  flex: 0 0 42px;
+  font-size: 0.82rem;
 
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 50%;
-
-  color: #ffffff;
-  background-color: var(--rh-primary);
-
-  font-weight: 700;
-}
-
-/* =========================================================
-   Status Indicators
-   ========================================================= */
-
-.reporthub-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-
-  padding: 0.4rem 0.75rem;
-
-  border-radius: 999px;
-
-  font-size: 0.875rem;
   font-weight: 600;
+
+  text-align: center;
+
+  text-decoration: none;
+
+  transition:
+    transform var(--rh-transition-fast),
+    color var(--rh-transition-fast),
+    background-color var(--rh-transition-fast),
+    border-color var(--rh-transition-fast);
 }
 
-.reporthub-status-pending {
-  color: #856404;
-  background-color: #fff3cd;
+.admin-quick-action i {
+  color: var(--rh-primary);
+
+  font-size: 1.2rem;
 }
 
-.reporthub-status-review {
-  color: #055160;
-  background-color: #cff4fc;
+.admin-quick-action:hover {
+  color: var(--rh-primary);
+
+  border-color: #b6d4fe;
+
+  background: var(--rh-primary-soft);
+
+  transform: translateY(-2px);
 }
 
-.reporthub-status-action {
-  color: #084298;
-  background-color: #cfe2ff;
-}
-
-.reporthub-status-resolved {
-  color: #0f5132;
-  background-color: #d1e7dd;
-}
 
 /* =========================================================
-   Track Report Timeline
+   22. RECHARTS
    ========================================================= */
 
-.reporthub-timeline {
-  position: relative;
+.admin-dashboard .recharts-wrapper {
+  font-family: var(--rh-font);
 }
 
-.reporthub-timeline-item {
-  position: relative;
-  padding-left: 2rem;
-  padding-bottom: 1.5rem;
+.admin-dashboard .recharts-text {
+  fill: var(--rh-text-muted);
 }
 
-.reporthub-timeline-item::before {
-  content: "";
-  position: absolute;
-
-  left: 7px;
-  top: 20px;
-  bottom: -2px;
-
-  width: 2px;
-
-  background-color: var(--rh-border);
+.admin-dashboard .recharts-cartesian-grid line {
+  stroke: #edf1f5;
 }
 
-.reporthub-timeline-item:last-child {
-  padding-bottom: 0;
+.admin-dashboard .recharts-tooltip-wrapper {
+  outline: none;
 }
 
-.reporthub-timeline-item:last-child::before {
-  display: none;
-}
-
-.reporthub-timeline-dot {
-  position: absolute;
-
-  left: 0;
-  top: 4px;
-
-  width: 16px;
-  height: 16px;
-
-  border-radius: 50%;
-
-  background-color: #ffffff;
-  border: 3px solid var(--rh-border);
-}
-
-.reporthub-timeline-dot.active {
-  border-color: var(--rh-primary);
-  background-color: var(--rh-primary);
-}
-
-.reporthub-timeline-dot.completed {
-  border-color: var(--rh-success);
-  background-color: var(--rh-success);
-}
 
 /* =========================================================
-   Success Page
+   23. BADGES
    ========================================================= */
 
-.reporthub-success-icon {
-  width: 72px;
-  height: 72px;
+.admin-dashboard .badge {
+  border-radius: 6px;
 
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 0.7rem;
 
-  border-radius: 50%;
-
-  color: var(--rh-success);
-  background-color: #d1e7dd;
-
-  font-size: 2rem;
-  font-weight: 700;
+  font-weight: 650;
 }
+
 
 /* =========================================================
-   Utility
+   24. FOCUS / ACCESSIBILITY
    ========================================================= */
 
-.reporthub-section {
-  padding-top: 5rem;
-  padding-bottom: 5rem;
-}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(13, 110, 253, 0.25);
 
-.reporthub-container {
-  width: min(1120px, 100%);
-  margin: 0 auto;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-/* =========================================================
-   Responsive Design
-   ========================================================= */
-
-@media (max-width: 991.98px) {
-  .reporthub-section {
-    padding-top: 4rem;
-    padding-bottom: 4rem;
-  }
-}
-
-@media (max-width: 767.98px) {
-  body {
-    font-size: 15px;
-  }
-
-  h1 {
-    letter-spacing: -0.4px;
-  }
-
-  .reporthub-section {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
-  }
-
-  .btn-lg {
-    width: 100%;
-  }
-}
-
-@media (max-width: 575.98px) {
-  .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-
-  .card-body {
-    padding: 1.25rem !important;
-  }
-}
-
-/* =========================================================
-   Accessibility
-   ========================================================= */
-
-:focus-visible {
-  outline: 3px solid rgba(13, 110, 253, 0.35);
   outline-offset: 2px;
 }
 
+
 /* =========================================================
-   Reduced Motion
+   25. MOBILE SIDEBAR
+   ========================================================= */
+
+@media (max-width: 991.98px) {
+  .admin-main {
+    margin-left: 0;
+  }
+
+  .admin-sidebar {
+    transform: translateX(-100%);
+
+    transition:
+      transform var(--rh-transition-slow);
+
+    box-shadow: none;
+  }
+
+  .admin-sidebar.is-open {
+    transform: translateX(0);
+
+    box-shadow: var(--rh-shadow-lg);
+  }
+
+  .admin-content {
+    padding: 1.25rem;
+  }
+}
+
+
+/* =========================================================
+   26. TABLET
+   ========================================================= */
+
+@media (max-width: 767.98px) {
+  .admin-content {
+    padding: 1rem;
+  }
+
+  .admin-dashboard-header h1 {
+    font-size: 1.7rem;
+  }
+
+  .admin-dashboard-actions {
+    width: 100%;
+  }
+
+  .admin-dashboard-actions .btn {
+    flex: 1 1 auto;
+  }
+
+  .admin-dashboard .card-body {
+    padding: 1.25rem !important;
+  }
+
+  .admin-dashboard .table {
+    min-width: 850px;
+  }
+
+  .admin-report-controls .form-control,
+  .admin-report-controls .form-select {
+    min-height: 44px;
+  }
+}
+
+
+/* =========================================================
+   27. MOBILE
+   ========================================================= */
+
+@media (max-width: 575.98px) {
+  .admin-content {
+    padding: 0.75rem;
+  }
+
+  .admin-dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .admin-dashboard-header p {
+    font-size: 0.88rem;
+  }
+
+  .admin-dashboard-actions {
+    display: grid !important;
+
+    grid-template-columns: 1fr;
+
+    width: 100%;
+  }
+
+  .admin-dashboard-actions .btn {
+    width: 100%;
+  }
+
+  .admin-stat-icon {
+    width: 42px;
+    height: 42px;
+
+    flex-basis: 42px;
+
+    font-size: 1rem;
+  }
+
+  .admin-dashboard .display-6 {
+    font-size: 1.75rem;
+  }
+
+  .admin-alert-card {
+    padding: 0.75rem;
+  }
+
+  .admin-alert-icon {
+    width: 36px;
+    height: 36px;
+
+    flex-basis: 36px;
+  }
+
+  .admin-insight-icon {
+    width: 40px;
+    height: 40px;
+
+    flex-basis: 40px;
+  }
+
+  .admin-quick-action {
+    min-height: 78px;
+
+    font-size: 0.78rem;
+  }
+}
+
+
+/* =========================================================
+   28. VERY SMALL SCREENS
+   ========================================================= */
+
+@media (max-width: 380px) {
+  .admin-content {
+    padding: 0.6rem;
+  }
+
+  .admin-dashboard .card-body {
+    padding: 1rem !important;
+  }
+
+  .admin-dashboard .display-6 {
+    font-size: 1.55rem;
+  }
+
+  .admin-dashboard-header h1 {
+    font-size: 1.4rem;
+  }
+}
+
+
+/* =========================================================
+   29. PRINT / PDF
+   ========================================================= */
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+  }
+
+  body {
+    color: #000000;
+  }
+
+  .admin-sidebar,
+  .admin-dashboard-actions,
+  .admin-report-controls,
+  .admin-dashboard a,
+  .admin-dashboard button {
+    display: none !important;
+  }
+
+  .admin-main {
+    margin-left: 0 !important;
+  }
+
+  .admin-content {
+    padding: 0 !important;
+
+    max-width: none !important;
+  }
+
+  .admin-dashboard {
+    width: 100% !important;
+  }
+
+  .admin-dashboard .card {
+    border: 1px solid #dee2e6 !important;
+
+    box-shadow: none !important;
+
+    break-inside: avoid;
+  }
+
+  .admin-dashboard section {
+    break-inside: avoid;
+  }
+
+  .admin-dashboard .table-responsive {
+    overflow: visible !important;
+  }
+
+  .admin-dashboard .table {
+    width: 100% !important;
+
+    min-width: 0 !important;
+  }
+
+  .admin-dashboard .table th,
+  .admin-dashboard .table td {
+    font-size: 9px;
+  }
+
+  .admin-dashboard .recharts-responsive-container {
+    max-width: 100% !important;
+  }
+}
+
+
+/* =========================================================
+   30. REDUCED MOTION
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
   html {
-    scroll-behavior: auto;
+    scroll-behavior: auto !important;
   }
 
   *,
   *::before,
   *::after {
-    transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-  }
-}
 
-
-
-.admin-sidebar {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 260px;
-  background: #ffffff;
-  border-right: 1px solid #dee2e6;
-  overflow-y: auto;
-  z-index: 1030;
-}
-
-.admin-main {
-  margin-left: 260px;
-  min-height: 100vh;
-}
-
-.admin-header {
-  position: sticky;
-  top: 0;
-  z-index: 1020;
-}
-
-.admin-nav-link {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  color: #495057;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.admin-nav-link:hover {
-  background: #f1f3f5;
-  color: #0d6efd;
-}
-
-.admin-nav-link.active {
-  background: #e7f1ff;
-  color: #0d6efd;
-}
-
-@media (max-width: 991.98px) {
-  .admin-sidebar {
-    position: static;
-    width: 100%;
-  }
-
-  .admin-main {
-    margin-left: 0;
+    transition-duration: 0.01ms !important;
   }
 }

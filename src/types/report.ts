@@ -1,26 +1,46 @@
 export type ReportStatus =
-  | 'pending'
-  | 'under-review'
-  | 'action-taken'
-  | 'resolved'
+  | 'Under Review'
+  | 'In Progress'
+  | 'Resolved'
+
+export type ReportPriority =
+  | 'Critical'
+  | 'High'
+  | 'Medium'
+  | 'Low'
 
 export type ReportCategory =
-  | 'road'
-  | 'street-light'
-  | 'drainage'
-  | 'water'
-  | 'waste'
-  | 'public-facility'
-  | 'other'
+  | 'Road Damage'
+  | 'Street Lighting'
+  | 'Water Supply'
+  | 'Waste Management'
+  | 'Drainage'
+  | 'Other'
 
 export type Report = {
   reference: string
   category: ReportCategory
   description: string
+
   location: string
   latitude: number | null
   longitude: number | null
-  evidenceName: string | null
+
   status: ReportStatus
+  priority: ReportPriority
+
   createdAt: string
+
+  reporter: {
+    name: string
+    email: string
+  }
+
+  department: string | null
+  assignedTo: string | null
+
+  evidence: string[]
+  evidenceName: string | null
+
+  administrativeNote: string
 }
