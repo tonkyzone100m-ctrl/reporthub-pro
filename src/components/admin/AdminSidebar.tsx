@@ -6,6 +6,11 @@ type NavigationItem = {
   icon: string
 }
 
+type AdminSidebarProps = {
+  isOpen: boolean
+  onClose: () => void
+}
+
 const overviewNavigation: NavigationItem[] = [
   {
     label: 'Dashboard',
@@ -60,16 +65,24 @@ const administrationNavigation: NavigationItem[] = [
   },
 ]
 
-function AdminSidebar() {
-  const renderNavigation = (items: NavigationItem[]) => (
+function AdminSidebar({
+  isOpen,
+  onClose,
+}: AdminSidebarProps) {
+  const renderNavigation = (
+    items: NavigationItem[],
+  ) => (
     <div className="d-grid gap-1">
       {items.map((item) => (
         <NavLink
           key={item.path}
           to={item.path}
           end={item.path === '/admin'}
+          onClick={onClose}
           className={({ isActive }) =>
-            `admin-nav-link ${isActive ? 'active' : ''}`
+            `admin-nav-link ${
+              isActive ? 'active' : ''
+            }`
           }
         >
           <span
@@ -89,25 +102,41 @@ function AdminSidebar() {
 
   return (
     <aside
-      className="admin-sidebar"
+      className={`admin-sidebar ${
+        isOpen ? 'is-open' : ''
+      }`}
       aria-label="Administration sidebar"
     >
-      <div className="admin-brand">
-        <div
-          className="admin-brand-icon"
-          aria-hidden="true"
-        >
-          <i className="bi bi-shield-check" />
-        </div>
-
-        <div className="admin-brand-text">
-          <div className="admin-brand-name">
-            ReportHub
+      <div className="admin-sidebar-top">
+        <div className="admin-brand">
+          <div
+            className="admin-brand-icon"
+            aria-hidden="true"
+          >
+            <i className="bi bi-shield-check" />
           </div>
 
-          <div className="admin-brand-subtitle">
-            Administration
+          <div className="admin-brand-text">
+            <div className="admin-brand-name">
+              ReportHub
+            </div>
+
+            <div className="admin-brand-subtitle">
+              Administration
+            </div>
           </div>
+
+          <button
+            type="button"
+            className="admin-sidebar-close"
+            onClick={onClose}
+            aria-label="Close navigation"
+          >
+            <i
+              className="bi bi-x-lg"
+              aria-hidden="true"
+            />
+          </button>
         </div>
       </div>
 
@@ -120,7 +149,9 @@ function AdminSidebar() {
             Overview
           </div>
 
-          {renderNavigation(overviewNavigation)}
+          {renderNavigation(
+            overviewNavigation,
+          )}
         </div>
 
         <div className="admin-nav-section">
@@ -128,7 +159,9 @@ function AdminSidebar() {
             Operations
           </div>
 
-          {renderNavigation(operationsNavigation)}
+          {renderNavigation(
+            operationsNavigation,
+          )}
         </div>
 
         <div className="admin-nav-section">
@@ -136,7 +169,9 @@ function AdminSidebar() {
             Administration
           </div>
 
-          {renderNavigation(administrationNavigation)}
+          {renderNavigation(
+            administrationNavigation,
+          )}
         </div>
       </nav>
 
@@ -149,7 +184,7 @@ function AdminSidebar() {
             <i className="bi bi-shield-lock" />
           </div>
 
-          <div>
+          <div className="min-width-0">
             <div className="fw-semibold">
               Secure Portal
             </div>

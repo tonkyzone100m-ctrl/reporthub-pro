@@ -1456,3 +1456,492 @@ textarea:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+
+
+
+
+
+/* ============================================================
+   REPORT HUB ADMIN RESPONSIVE LAYOUT
+   ============================================================ */
+
+:root {
+  --admin-sidebar-width: 260px;
+  --admin-header-height: 73px;
+  --admin-border-color: #e5e7eb;
+  --admin-sidebar-bg: #ffffff;
+  --admin-page-bg: #f8fafc;
+}
+
+/* Prevent accidental horizontal scrolling */
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.min-width-0 {
+  min-width: 0;
+}
+
+/* ============================================================
+   ADMIN LAYOUT
+   ============================================================ */
+
+.admin-layout {
+  min-height: 100vh;
+  background: var(--admin-page-bg);
+}
+
+.admin-main {
+  min-width: 0;
+  min-height: 100vh;
+  margin-left: var(--admin-sidebar-width);
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+
+.admin-sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 1040;
+
+  width: var(--admin-sidebar-width);
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  background: var(--admin-sidebar-bg);
+  border-right: 1px solid var(--admin-border-color);
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.admin-sidebar-top {
+  flex-shrink: 0;
+}
+
+.admin-brand {
+  min-height: 73px;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 16px 18px;
+
+  border-bottom: 1px solid var(--admin-border-color);
+}
+
+.admin-brand-icon {
+  width: 40px;
+  height: 40px;
+
+  flex: 0 0 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: var(--bs-primary);
+  color: #fff;
+
+  font-size: 19px;
+}
+
+.admin-brand-text {
+  min-width: 0;
+}
+
+.admin-brand-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.admin-brand-subtitle {
+  margin-top: 2px;
+
+  color: #6c757d;
+
+  font-size: 0.75rem;
+}
+
+.admin-sidebar-close {
+  display: none;
+
+  margin-left: auto;
+
+  width: 38px;
+  height: 38px;
+
+  border: 1px solid var(--admin-border-color);
+  border-radius: 8px;
+
+  background: #fff;
+  color: #495057;
+}
+
+.admin-sidebar-nav {
+  flex: 1;
+
+  padding: 20px 12px;
+}
+
+.admin-nav-section {
+  margin-bottom: 24px;
+}
+
+.admin-nav-section-label {
+  padding: 0 10px 8px;
+
+  color: #6c757d;
+
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.admin-nav-link {
+  min-height: 44px;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 9px 11px;
+
+  border-radius: 9px;
+
+  color: #495057;
+  text-decoration: none;
+
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.admin-nav-link:hover {
+  background: #f1f5f9;
+  color: var(--bs-primary);
+}
+
+.admin-nav-link.active {
+  background: rgba(
+    var(--bs-primary-rgb),
+    0.1
+  );
+
+  color: var(--bs-primary);
+  font-weight: 600;
+}
+
+.admin-nav-icon {
+  width: 22px;
+
+  flex: 0 0 22px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 1rem;
+}
+
+.admin-nav-label {
+  min-width: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-sidebar-footer {
+  flex-shrink: 0;
+
+  padding: 14px 12px;
+
+  border-top: 1px solid var(--admin-border-color);
+}
+
+.admin-security-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 12px;
+
+  border: 1px solid var(--admin-border-color);
+  border-radius: 10px;
+
+  background: #f8fafc;
+}
+
+.admin-security-icon {
+  width: 34px;
+  height: 34px;
+
+  flex: 0 0 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+
+  background: #e8f5e9;
+  color: #198754;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.admin-header {
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+
+  min-height: var(--admin-header-height);
+}
+
+.admin-menu-button {
+  display: none;
+
+  width: 40px;
+  height: 40px;
+
+  padding: 0;
+}
+
+.admin-avatar {
+  width: 40px;
+  height: 40px;
+
+  flex: 0 0 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: var(--bs-primary);
+  color: #fff;
+
+  font-weight: 700;
+}
+
+/* ============================================================
+   CONTENT
+   ============================================================ */
+
+.admin-content {
+  width: 100%;
+  max-width: 1600px;
+
+  margin: 0 auto;
+
+  padding: 24px;
+}
+
+/* ============================================================
+   MOBILE OVERLAY
+   ============================================================ */
+
+.admin-sidebar-overlay {
+  display: none;
+}
+
+/* ============================================================
+   TABLE RESPONSIVENESS
+   ============================================================ */
+
+.admin-content .table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-content table {
+  min-width: 650px;
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+
+.admin-content .card {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.admin-content img {
+  max-width: 100%;
+}
+
+/* ============================================================
+   TABLET
+   ============================================================ */
+
+@media (max-width: 1199.98px) {
+  :root {
+    --admin-sidebar-width: 235px;
+  }
+
+  .admin-content {
+    padding: 20px;
+  }
+}
+
+/* ============================================================
+   MOBILE / TABLET SIDEBAR
+   ============================================================ */
+
+@media (max-width: 991.98px) {
+  .admin-main {
+    margin-left: 0;
+  }
+
+  .admin-sidebar {
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+
+  .admin-sidebar.is-open {
+    transform: translateX(0);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.18);
+  }
+
+  .admin-sidebar-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .admin-menu-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .admin-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1030;
+
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    padding: 0;
+    border: 0;
+
+    background: rgba(15, 23, 42, 0.45);
+  }
+
+  .admin-content {
+    padding: 20px;
+  }
+}
+
+/* ============================================================
+   SMALL MOBILE
+   ============================================================ */
+
+@media (max-width: 575.98px) {
+  :root {
+    --admin-header-height: 64px;
+  }
+
+  .admin-header .container-fluid {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .admin-content {
+    padding: 16px 12px;
+  }
+
+  .admin-brand {
+    min-height: 64px;
+    padding: 12px 14px;
+  }
+
+  .admin-sidebar {
+    width: min(86vw, 320px);
+  }
+
+  .admin-sidebar-nav {
+    padding: 16px 10px;
+  }
+
+  .admin-nav-section {
+    margin-bottom: 18px;
+  }
+
+  .admin-nav-link {
+    min-height: 46px;
+    padding: 10px;
+  }
+
+  .admin-avatar {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+
+  .admin-menu-button {
+    width: 38px;
+    height: 38px;
+  }
+
+  .admin-content .card-body {
+    padding: 1rem !important;
+  }
+
+  .admin-content .btn {
+    max-width: 100%;
+  }
+}
+
+/* ============================================================
+   VERY SMALL MOBILE
+   ============================================================ */
+
+@media (max-width: 380px) {
+  .admin-content {
+    padding: 12px 10px;
+  }
+
+  .admin-header .container-fluid {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .admin-header {
+    font-size: 0.9rem;
+  }
+
+  .admin-brand-icon {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+}
