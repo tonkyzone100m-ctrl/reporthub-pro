@@ -13,8 +13,14 @@ import About from './pages/About'
 import Contact from './pages/Contact'
 import Login from './pages/Login'
 import Register from './pages/Register'
-
 import MyReports from './pages/MyReports'
+import Profile from './pages/Profile'
+
+
+
+
+
+
 
 
 
@@ -91,6 +97,11 @@ function App() {
   path="/my-reports"
   element={<MyReports />}
 />
+<Route
+  path="/profile"
+  element={<Profile />}
+/>
+
 
           <Route
             path="*"
