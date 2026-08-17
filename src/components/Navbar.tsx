@@ -7,6 +7,7 @@ function Navbar() {
         <NavLink
           to="/"
           className="navbar-brand fw-bold text-primary"
+          end
         >
           ReportHub
         </NavLink>
@@ -70,36 +71,36 @@ function Navbar() {
 
             <li className="nav-item">
               <NavLink
-                to="/about"
+                to="/my-reports"
                 className={({ isActive }) =>
                   `nav-link ${
                     isActive ? 'active fw-semibold' : ''
                   }`
                 }
               >
-                About
+                My Reports
               </NavLink>
             </li>
 
             <li className="nav-item">
               <NavLink
-                to="/contact"
+                to="/profile"
                 className={({ isActive }) =>
                   `nav-link ${
                     isActive ? 'active fw-semibold' : ''
                   }`
                 }
               >
-                Contact
+                Profile
               </NavLink>
             </li>
 
             <li className="nav-item ms-lg-2 mt-2 mt-lg-0">
               <NavLink
-                to="/report"
+                to="/login"
                 className="btn btn-primary px-3"
               >
-                Report an Issue
+                Sign In
               </NavLink>
             </li>
           </ul>
