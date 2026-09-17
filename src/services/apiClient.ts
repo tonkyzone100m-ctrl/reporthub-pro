@@ -1,6 +1,6 @@
 import type { Report } from '../types/report'
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000').replace(/\/$/, '')
+const API_BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://reporthub.iceiy.com').replace(/\/$/, '')
 
 type ApiResponse<T> = { data?: T; error?: string; message?: string }
 
@@ -14,7 +14,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   try {
     response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers })
   } catch {
-    throw new Error(`The ReportHub API is unavailable at ${API_BASE_URL}. Start it with "npm run api:start".`)
+    throw new Error(`The ReportHub API is unavailable at ${API_BASE_URL}. Please check your connection or backend status.`)
   }
   if (!(response.headers.get('content-type') ?? '').includes('application/json')) {
     throw new Error(`The ReportHub API returned an invalid response from ${API_BASE_URL}.`)
