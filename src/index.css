@@ -9,7 +9,7 @@
 
 :root {
   /* Brand */
-  --rh-primary: #59fd39;
+  --rh-primary: #4326c4;
   --rh-primary-dark: #0baa05;
   --rh-primary-soft: #eaf3ff;
 
@@ -30,7 +30,7 @@
   --rh-text: #1f2937;
   --rh-text-secondary: #4b5563;
   --rh-text-muted: #6b7280;
-  --rh-text-light: #9ca3af;
+  --rh-text-light: #b3e0af;
 
   /* Backgrounds */
   --rh-bg: #f5f7fa;
