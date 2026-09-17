@@ -5,7 +5,7 @@ import type {
 } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { createReport } from '../services/reportService'
+import { createReportConnected } from '../services/reportService'
 import type { ReportCategory } from '../types/report'
 
 type ReportFormData = {
@@ -229,7 +229,7 @@ function Report() {
   /*
    * Submit report.
    */
-  function handleSubmit(
+  async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault()
@@ -288,7 +288,7 @@ function Report() {
       /*
        * Create and store the report.
        */
-      const report = createReport({
+      const report = await createReportConnected({
         category: formData.category,
         description: cleanedDescription,
         location: cleanedLocation,

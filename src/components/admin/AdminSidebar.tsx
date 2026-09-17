@@ -109,12 +109,11 @@ function AdminSidebar({
     >
       <div className="admin-sidebar-top">
         <div className="admin-brand">
-          <div
-            className="admin-brand-icon"
-            aria-hidden="true"
-          >
-            <i className="bi bi-shield-check" />
-          </div>
+          <img
+            className="admin-brand-logo"
+            src="/reporthub-logo.png"
+            alt=""
+          />
 
           <div className="admin-brand-text">
             <div className="admin-brand-name">

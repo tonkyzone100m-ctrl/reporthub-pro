@@ -1,12 +1,25 @@
-﻿import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { getCurrentUser, signOut } from '../../services/auth'
 
 type AdminHeaderProps = {
   onMenuClick: () => void
+  darkMode: boolean
+  onThemeToggle: () => void
 }
 
 function AdminHeader({
   onMenuClick,
+  darkMode,
+  onThemeToggle,
 }: AdminHeaderProps) {
+  const navigate = useNavigate()
+  const user = getCurrentUser()
+
+  function handleSignOut() {
+    signOut()
+    navigate('/admin/login', { replace: true })
+  }
+
   return (
     <header className="admin-header bg-white border-bottom">
       <div className="container-fluid px-3 px-md-4 py-3">
@@ -39,6 +52,15 @@ function AdminHeader({
           </div>
 
           <div className="d-flex align-items-center gap-2 flex-shrink-0">
+            <button
+              type="button"
+              className="btn btn-outline-secondary btn-sm"
+              onClick={onThemeToggle}
+              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              <i className={`bi ${darkMode ? 'bi-sun' : 'bi-moon-stars'}`} aria-hidden="true" />
+              <span className="d-none d-lg-inline ms-1">{darkMode ? 'Light' : 'Dark'}</span>
+            </button>
 
             <Link
               to="/admin/notifications"
@@ -57,12 +79,17 @@ function AdminHeader({
 
             <div className="text-end d-none d-md-block">
               <div className="fw-semibold small">
-                System Administrator
+                {user?.name ?? 'System Administrator'}
               </div>
 
               <div className="text-secondary small">
                 Administrator
               </div>
+
+              <button type="button" className="btn btn-outline-secondary btn-sm" onClick={handleSignOut}>
+                <i className="bi bi-box-arrow-right me-1" aria-hidden="true" />
+                <span className="d-none d-sm-inline">Sign out</span>
+              </button>
             </div>
 
             <div

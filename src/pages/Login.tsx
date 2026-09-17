@@ -1,6 +1,8 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { loginWithApi } from '../services/apiClient'
+import { saveCurrentUser } from '../services/auth'
 
 function Login() {
   const navigate = useNavigate()
@@ -8,8 +10,9 @@ function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError('')
 
@@ -18,9 +21,13 @@ function Login() {
       return
     }
 
-    // Temporary frontend flow.
-    // Authentication will be connected to the backend later.
-    navigate('/my-reports')
+    try {
+      const user = await loginWithApi(email.trim(), password)
+      saveCurrentUser(user)
+      navigate('/my-reports')
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Unable to sign in.')
+    }
   }
 
   return (
@@ -81,18 +88,29 @@ function Login() {
                       Password
                     </label>
 
-                    <input
-                      id="password"
-                      type="password"
-                      className="form-control form-control-lg"
-                      value={password}
-                      onChange={(event) =>
-                        setPassword(event.target.value)
-                      }
-                      placeholder="Enter your password"
-                      autoComplete="current-password"
-                      required
-                    />
+                    <div className="input-group input-group-lg">
+                      <input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        className="form-control"
+                        value={password}
+                        onChange={(event) =>
+                          setPassword(event.target.value)
+                        }
+                        placeholder="Enter your password"
+                        autoComplete="current-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setShowPassword((visible) => !visible)}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        aria-pressed={showPassword}
+                      >
+                        <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`} aria-hidden="true" />
+                      </button>
+                    </div>
                   </div>
 
                   <button

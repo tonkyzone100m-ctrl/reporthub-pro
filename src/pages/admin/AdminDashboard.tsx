@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { getReportsFromApi } from '../../services/apiClient'
 import {
   Area,
   AreaChart,
@@ -40,82 +41,6 @@ type StatCardProps = {
   iconClass: string
   href?: string
 }
-
-const recentReports: Report[] = [
-  {
-    reference: 'RPT-2026-0148',
-    category: 'Water Supply',
-    location: 'Kigali City',
-    priority: 'Critical',
-    status: 'Under Review',
-    submitted: 'Today, 09:42',
-  },
-  {
-    reference: 'RPT-2026-0147',
-    category: 'Road Damage',
-    location: 'Gasabo District',
-    priority: 'High',
-    status: 'In Progress',
-    submitted: 'Today, 08:17',
-  },
-  {
-    reference: 'RPT-2026-0146',
-    category: 'Street Lighting',
-    location: 'Kicukiro District',
-    priority: 'Medium',
-    status: 'In Progress',
-    submitted: 'Yesterday, 16:35',
-  },
-  {
-    reference: 'RPT-2026-0145',
-    category: 'Waste Management',
-    location: 'Nyarugenge District',
-    priority: 'High',
-    status: 'Under Review',
-    submitted: 'Yesterday, 14:12',
-  },
-  {
-    reference: 'RPT-2026-0144',
-    category: 'Drainage',
-    location: 'Gasabo District',
-    priority: 'Medium',
-    status: 'Resolved',
-    submitted: 'Yesterday, 11:28',
-  },
-]
-
-const reportTrend = [
-  { month: 'Mar', submitted: 42, resolved: 31 },
-  { month: 'Apr', submitted: 58, resolved: 44 },
-  { month: 'May', submitted: 64, resolved: 49 },
-  { month: 'Jun', submitted: 71, resolved: 55 },
-  { month: 'Jul', submitted: 83, resolved: 67 },
-  { month: 'Aug', submitted: 96, resolved: 72 },
-]
-
-const reportStatuses = [
-  {
-    name: 'Under Review',
-    value: 64,
-    color: '#ffc107',
-  },
-  {
-    name: 'In Progress',
-    value: 91,
-    color: '#0d6efd',
-  },
-  {
-    name: 'Resolved',
-    value: 93,
-    color: '#198754',
-  },
-]
-
-const priorityReports = recentReports.filter(
-  (report) =>
-    report.priority === 'Critical' ||
-    report.priority === 'High',
-)
 
 function StatCard({
   label,
@@ -217,6 +142,8 @@ function getStatusClass(status: ReportStatus) {
 }
 
 function AdminDashboard() {
+  const [liveReports, setLiveReports] = useState<Report[]>([])
+  const [loadError, setLoadError] = useState('')
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<
     'All' | ReportStatus
@@ -225,10 +152,27 @@ function AdminDashboard() {
     'All' | ReportPriority
   >('All')
 
+  useEffect(() => {
+    getReportsFromApi()
+      .then((reports) => {
+        setLiveReports(reports.map((report) => ({
+          reference: report.reference,
+          category: report.category,
+          location: report.location,
+          priority: report.priority === 'Low' ? 'Medium' : report.priority,
+          status: report.status,
+          submitted: new Date(report.createdAt).toLocaleString(),
+        })))
+      })
+      .catch((error: unknown) => {
+        setLoadError(error instanceof Error ? error.message : 'Unable to load live reports.')
+      })
+  }, [])
+
   const filteredReports = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase()
 
-    return recentReports.filter((report) => {
+    return liveReports.filter((report) => {
       const matchesSearch =
         normalizedSearch === '' ||
         report.reference.toLowerCase().includes(normalizedSearch) ||
@@ -249,7 +193,25 @@ function AdminDashboard() {
         matchesPriority
       )
     })
-  }, [search, statusFilter, priorityFilter])
+  }, [liveReports, search, statusFilter, priorityFilter])
+
+  const priorityReports = liveReports.filter(
+    (report) => report.priority === 'Critical' || report.priority === 'High',
+  )
+  const reportStatuses = (['Under Review', 'In Progress', 'Resolved'] as const).map((status) => ({
+    name: status,
+    value: liveReports.filter((report) => report.status === status).length,
+    color: status === 'Resolved' ? '#198754' : status === 'In Progress' ? '#0d6efd' : '#ffc107',
+  }))
+  const totalReports = liveReports.length
+  const underReviewCount = reportStatuses[0].value
+  const inProgressCount = reportStatuses[1].value
+  const resolvedCount = reportStatuses[2].value
+  const reportTrend = [{
+    month: 'Current',
+    submitted: totalReports,
+    resolved: resolvedCount,
+  }]
 
   const hasActiveFilters =
     search.trim() !== '' ||
@@ -264,6 +226,7 @@ function AdminDashboard() {
 
   return (
     <div className="admin-dashboard">
+      {loadError && <div className="alert alert-warning border-0" role="status">{loadError}</div>}
 
       {/* =====================================================
           PAGE HEADER
@@ -325,7 +288,7 @@ function AdminDashboard() {
           <div className="col-12 col-sm-6 col-xl-3">
             <StatCard
               label="Total Reports"
-              value="248"
+              value={String(totalReports)}
               description="All submitted reports"
               icon="bi-file-earmark-text"
               iconClass="admin-stat-primary"
@@ -336,7 +299,7 @@ function AdminDashboard() {
           <div className="col-12 col-sm-6 col-xl-3">
             <StatCard
               label="Under Review"
-              value="64"
+              value={String(underReviewCount)}
               description="Awaiting administrative review"
               icon="bi-hourglass-split"
               iconClass="admin-stat-warning"
@@ -347,7 +310,7 @@ function AdminDashboard() {
           <div className="col-12 col-sm-6 col-xl-3">
             <StatCard
               label="In Progress"
-              value="91"
+              value={String(inProgressCount)}
               description="Currently being addressed"
               icon="bi-arrow-repeat"
               iconClass="admin-stat-info"
@@ -358,7 +321,7 @@ function AdminDashboard() {
           <div className="col-12 col-sm-6 col-xl-3">
             <StatCard
               label="Resolved"
-              value="93"
+              value={String(resolvedCount)}
               description="Successfully resolved reports"
               icon="bi-check-circle"
               iconClass="admin-stat-success"
@@ -1011,7 +974,7 @@ function AdminDashboard() {
                 </strong>{' '}
                 of{' '}
                 <strong className="text-dark">
-                  {recentReports.length}
+                  {liveReports.length}
                 </strong>{' '}
                 recent reports
               </div>

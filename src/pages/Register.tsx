@@ -1,6 +1,7 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { registerWithApi } from '../services/apiClient'
 
 type RegisterFormData = {
   name: string
@@ -23,6 +24,8 @@ function Register() {
     useState<RegisterFormData>(initialFormData)
 
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   function handleChange(
     event: React.ChangeEvent<HTMLInputElement>,
@@ -37,7 +40,7 @@ function Register() {
     setError('')
   }
 
-  function handleSubmit(
+  async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault()
@@ -68,9 +71,16 @@ function Register() {
       return
     }
 
-    // Temporary frontend flow.
-    // Registration will be connected to the backend later.
-    navigate('/login')
+    try {
+      await registerWithApi(
+        formData.name.trim(),
+        formData.email.trim(),
+        formData.password,
+      )
+      navigate('/login')
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Unable to create your account.')
+    }
   }
 
   return (
@@ -154,17 +164,28 @@ function Register() {
                       Password
                     </label>
 
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      className="form-control form-control-lg"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="At least 8 characters"
-                      autoComplete="new-password"
-                      required
-                    />
+                    <div className="input-group input-group-lg">
+                      <input
+                        id="password"
+                        name="password"
+                        type={showPassword ? 'text' : 'password'}
+                        className="form-control"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="At least 8 characters"
+                        autoComplete="new-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setShowPassword((visible) => !visible)}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        aria-pressed={showPassword}
+                      >
+                        <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`} aria-hidden="true" />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="mb-4">
@@ -175,17 +196,28 @@ function Register() {
                       Confirm password
                     </label>
 
-                    <input
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type="password"
-                      className="form-control form-control-lg"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      placeholder="Enter your password again"
-                      autoComplete="new-password"
-                      required
-                    />
+                    <div className="input-group input-group-lg">
+                      <input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        className="form-control"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        placeholder="Enter your password again"
+                        autoComplete="new-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setShowConfirmPassword((visible) => !visible)}
+                        aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                        aria-pressed={showConfirmPassword}
+                      >
+                        <i className={`bi ${showConfirmPassword ? 'bi-eye-slash' : 'bi-eye'}`} aria-hidden="true" />
+                      </button>
+                    </div>
                   </div>
 
                   <button

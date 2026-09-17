@@ -1,8 +1,7 @@
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
-import {
-  getReportByReference,
-} from '../../services/reportService'
+import { getReportFromApi, updateReportFromApi } from '../../services/apiClient'
 
 import type {
   ReportPriority,
@@ -14,9 +13,40 @@ function AdminReportDetails() {
     id: string
   }>()
 
-  const report = id
-    ? getReportByReference(id)
-    : undefined
+  const [report, setReport] = useState<Awaited<ReturnType<typeof getReportFromApi>> | undefined>()
+  const [loadError, setLoadError] = useState('')
+  const [status, setStatus] = useState<ReportStatus>(report?.status ?? 'Under Review')
+  const [priority, setPriority] = useState<ReportPriority>(report?.priority ?? 'Medium')
+  const [saved, setSaved] = useState(false)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    if (!id) return
+    getReportFromApi(id).then((loadedReport) => {
+      setReport(loadedReport)
+      setStatus(loadedReport.status)
+      setPriority(loadedReport.priority)
+    }).catch((error: unknown) => {
+      setLoadError(error instanceof Error ? error.message : 'Unable to load this report.')
+    })
+  }, [id])
+
+  async function saveChanges() {
+    if (!report || saving) return
+    setSaving(true)
+    setSaved(false)
+    try {
+      const updated = await updateReportFromApi(report.reference, { status, priority })
+      setReport(updated)
+      setStatus(updated.status)
+      setPriority(updated.priority)
+      setSaved(true)
+    } catch (error: unknown) {
+      setLoadError(error instanceof Error ? error.message : 'Unable to save report changes.')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   function formatDate(date: string): string {
     const parsedDate = new Date(date)
@@ -76,6 +106,7 @@ function AdminReportDetails() {
   if (!report) {
     return (
       <div className="container-fluid py-4">
+        {loadError && <div className="alert alert-danger border-0" role="alert">{loadError}</div>}
         <div className="card border-0 shadow-sm">
           <div className="card-body p-4 p-md-5 text-center">
 
@@ -366,7 +397,11 @@ function AdminReportDetails() {
                 <select
                   id="report-status"
                   className="form-select"
-                  defaultValue={report.status}
+                  value={status}
+                  onChange={(event) => {
+                    setStatus(event.target.value as ReportStatus)
+                    setSaved(false)
+                  }}
                 >
                   <option>
                     Under Review
@@ -393,7 +428,11 @@ function AdminReportDetails() {
                 <select
                   id="report-priority"
                   className="form-select"
-                  defaultValue={report.priority}
+                  value={priority}
+                  onChange={(event) => {
+                    setPriority(event.target.value as ReportPriority)
+                    setSaved(false)
+                  }}
                 >
                   <option>Critical</option>
                   <option>High</option>
@@ -405,10 +444,18 @@ function AdminReportDetails() {
               <button
                 type="button"
                 className="btn btn-primary w-100"
+                onClick={saveChanges}
+                disabled={saving}
               >
                 <i className="bi bi-check2-circle me-2" />
-                Save Changes
+                {saving ? 'Saving...' : 'Save Changes'}
               </button>
+              {saved && (
+                <div className="small text-success text-center mt-3" role="status">
+                  <i className="bi bi-check-circle me-1" aria-hidden="true" />
+                  Changes saved for this session.
+                </div>
+              )}
 
             </div>
           </div>

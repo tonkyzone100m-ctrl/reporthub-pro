@@ -1,13 +1,12 @@
 ﻿import {
   useMemo,
+  useEffect,
   useState,
 } from 'react'
 
 import { Link } from 'react-router-dom'
 
-import {
-  getReports,
-} from '../../services/reportService'
+import { getReportsFromApi } from '../../services/apiClient'
 
 import type {
   Report,
@@ -113,10 +112,14 @@ function AdminAIAnalyzer() {
    * ----------------------------------------------------------
    */
 
-  const reports = useMemo(
-    () => getReports(),
-    [],
-  )
+  const [reports, setReports] = useState<Report[]>([])
+  const [loadError, setLoadError] = useState('')
+
+  useEffect(() => {
+    getReportsFromApi().then(setReports).catch((error: unknown) => {
+      setLoadError(error instanceof Error ? error.message : 'Unable to load live report data.')
+    })
+  }, [])
 
   /*
    * ----------------------------------------------------------
@@ -633,6 +636,7 @@ function AdminAIAnalyzer() {
 
   return (
     <div className="container-fluid px-0">
+      {loadError && <div className="alert alert-warning border-0" role="status">{loadError}</div>}
 
       {/* ====================================================
           HEADER

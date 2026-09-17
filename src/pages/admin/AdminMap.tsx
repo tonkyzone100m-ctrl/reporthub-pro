@@ -9,7 +9,7 @@ import {
 import L from 'leaflet'
 import { Link } from 'react-router-dom'
 
-import { getReports } from '../../services/reportService'
+import { getReportsFromApi } from '../../services/apiClient'
 
 import type {
   Report,
@@ -182,10 +182,14 @@ function AdminMap() {
    * ----------------------------------------------------------
    */
 
-  const reports = useMemo(
-    () => getReports(),
-    [],
-  )
+  const [reports, setReports] = useState<Report[]>([])
+  const [loadError, setLoadError] = useState('')
+
+  useEffect(() => {
+    getReportsFromApi().then(setReports).catch((error: unknown) => {
+      setLoadError(error instanceof Error ? error.message : 'Unable to load live map data.')
+    })
+  }, [])
 
   /*
    * ----------------------------------------------------------
@@ -254,37 +258,11 @@ function AdminMap() {
       priorityFilter,
     ])
 
-  /*
-   * ----------------------------------------------------------
-   * KEEP SELECTED REPORT VALID
-   * ----------------------------------------------------------
-   */
-
-  useEffect(() => {
-    if (
-      filteredReports.length === 0
-    ) {
-      setSelectedReport(null)
-      return
-    }
-
-    const selectedStillExists =
-      selectedReport !== null &&
-      filteredReports.some(
-        (report) =>
-          report.reference ===
-          selectedReport.reference,
-      )
-
-    if (!selectedStillExists) {
-      setSelectedReport(
-        filteredReports[0],
-      )
-    }
-  }, [
-    filteredReports,
-    selectedReport,
-  ])
+  const effectiveSelectedReport =
+    filteredReports.find(
+      (report) =>
+        report.reference === selectedReport?.reference,
+    ) ?? filteredReports[0] ?? null
 
   /*
    * ----------------------------------------------------------
@@ -330,6 +308,7 @@ function AdminMap() {
 
   return (
     <div className="container-fluid px-0">
+      {loadError && <div className="alert alert-warning border-0" role="status">{loadError}</div>}
 
       {/* ======================================================
           PAGE HEADER
@@ -611,7 +590,7 @@ function AdminMap() {
                 />
 
                 <MapController
-                  report={selectedReport}
+                  report={effectiveSelectedReport}
                 />
 
                 {filteredReports.map(
@@ -815,7 +794,7 @@ function AdminMap() {
                     (report) => {
 
                       const isSelected =
-                        selectedReport?.reference ===
+                        effectiveSelectedReport?.reference ===
                         report.reference
 
                       return (

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 type DepartmentStatus = 'Active' | 'Inactive'
 
@@ -70,9 +70,59 @@ const initialDepartments: Department[] = [
   },
 ]
 
+const DEPARTMENTS_KEY = 'reporthub_admin_departments'
+
+type DepartmentForm = Pick<Department, 'name' | 'description' | 'responsibility' | 'email' | 'phone'>
+
+const emptyDepartment: DepartmentForm = {
+  name: '',
+  description: '',
+  responsibility: '',
+  email: '',
+  phone: '',
+}
+
 function AdminDepartments() {
-  const [departments, setDepartments] =
-    useState<Department[]>(initialDepartments)
+  const [departments, setDepartments] = useState<Department[]>(() => {
+    const saved = localStorage.getItem(DEPARTMENTS_KEY)
+    if (!saved) return initialDepartments
+    try {
+      return JSON.parse(saved) as Department[]
+    } catch {
+      return initialDepartments
+    }
+  })
+  const [departmentForm, setDepartmentForm] = useState<DepartmentForm>(emptyDepartment)
+  const [formError, setFormError] = useState('')
+
+  useEffect(() => {
+    localStorage.setItem(DEPARTMENTS_KEY, JSON.stringify(departments))
+  }, [departments])
+
+  function updateForm(field: keyof DepartmentForm, value: string) {
+    setDepartmentForm((current) => ({ ...current, [field]: value }))
+    setFormError('')
+  }
+
+  function createDepartment() {
+    const values = Object.values(departmentForm).map((value) => value.trim())
+    if (values.some((value) => !value)) {
+      setFormError('Complete every department field before saving.')
+      return
+    }
+    const nextId = `DEP-${String(departments.length + 1).padStart(3, '0')}`
+    setDepartments((current) => [...current, {
+      ...departmentForm,
+      id: nextId,
+      members: 0,
+      openReports: 0,
+      resolvedReports: 0,
+      status: 'Active',
+    }])
+    setDepartmentForm(emptyDepartment)
+    setFormError('')
+    setShowForm(false)
+  }
 
   const [searchTerm, setSearchTerm] =
     useState('')
@@ -254,6 +304,7 @@ function AdminDepartments() {
           </div>
 
           <div className="card-body p-4">
+            {formError && <div className="alert alert-danger" role="alert">{formError}</div>}
 
             <div className="row g-3">
 
@@ -270,6 +321,8 @@ function AdminDepartments() {
                   type="text"
                   className="form-control"
                   placeholder="e.g. Transport"
+                  value={departmentForm.name}
+                  onChange={(event) => updateForm('name', event.target.value)}
                 />
               </div>
 
@@ -286,6 +339,8 @@ function AdminDepartments() {
                   type="email"
                   className="form-control"
                   placeholder="department@reporthub.rw"
+                  value={departmentForm.email}
+                  onChange={(event) => updateForm('email', event.target.value)}
                 />
               </div>
 
@@ -302,6 +357,8 @@ function AdminDepartments() {
                   type="tel"
                   className="form-control"
                   placeholder="+250 788 000 000"
+                  value={departmentForm.phone}
+                  onChange={(event) => updateForm('phone', event.target.value)}
                 />
               </div>
 
@@ -318,6 +375,8 @@ function AdminDepartments() {
                   type="text"
                   className="form-control"
                   placeholder="e.g. Transport infrastructure"
+                  value={departmentForm.responsibility}
+                  onChange={(event) => updateForm('responsibility', event.target.value)}
                 />
               </div>
 
@@ -334,6 +393,8 @@ function AdminDepartments() {
                   className="form-control"
                   rows={3}
                   placeholder="Describe the department's responsibilities..."
+                  value={departmentForm.description}
+                  onChange={(event) => updateForm('description', event.target.value)}
                 />
               </div>
 
@@ -352,9 +413,7 @@ function AdminDepartments() {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() =>
-                    setShowForm(false)
-                  }
+                  onClick={createDepartment}
                 >
                   <i className="bi bi-check-lg me-2" />
                   Create Department

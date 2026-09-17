@@ -5,6 +5,12 @@ import type {
   ReportStatus,
 } from '../types/report'
 
+import {
+  createReportFromApi,
+  getMyReportsFromApi,
+  getReportFromApi,
+} from './apiClient'
+
 /*
  * ============================================================
  * MOCK REPORT DATA
@@ -210,6 +216,24 @@ export function getReportByReference(
   )
 }
 
+export async function getReportByReferenceConnected(
+  reference: string,
+): Promise<Report | undefined> {
+  try {
+    return await getReportFromApi(reference.trim().toUpperCase())
+  } catch (error) {
+    if (error instanceof TypeError || (error instanceof Error && error.message.includes('Failed to fetch'))) {
+      return getReportByReference(reference)
+    }
+
+    throw error
+  }
+}
+
+export async function getMyReportsConnected(): Promise<Report[]> {
+  return getMyReportsFromApi()
+}
+
 /*
  * ============================================================
  * CREATE REPORT
@@ -285,4 +309,21 @@ export function createReport(
   mockReports.unshift(report)
 
   return report
+}
+
+export async function createReportConnected(
+  input: CreateReportInput,
+): Promise<{ reference: string }> {
+  try {
+    return await createReportFromApi(input)
+  } catch (error) {
+    if (
+      error instanceof TypeError ||
+      (error instanceof Error &&
+        error.message.includes('Failed to fetch'))
+    ) {
+      return { reference: createReport(input).reference }
+    }
+    throw error
+  }
 }

@@ -41,6 +41,7 @@ import AdminUsers from './pages/admin/AdminUsers'
 import AdminNotifications from './pages/admin/AdminNotifications'
 import AdminAnalytics from './pages/admin/AdminAnalytics'
 import AdminSettings from './pages/admin/AdminSettings'
+import RequireAuth from './components/RequireAuth'
 
 // ============================================================
 // 404 PAGE
@@ -97,10 +98,9 @@ function App() {
             element={<Home />}
           />
 
-          <Route
-            path="/report"
-            element={<Report />}
-          />
+          <Route element={<RequireAuth role="citizen" />}>
+            <Route path="/report" element={<Report />} />
+          </Route>
 
           <Route
             path="/track"
@@ -127,15 +127,10 @@ function App() {
             element={<Register />}
           />
 
-          <Route
-            path="/my-reports"
-            element={<MyReports />}
-          />
-
-          <Route
-            path="/profile"
-            element={<Profile />}
-          />
+          <Route element={<RequireAuth role="citizen" />}>
+            <Route path="/my-reports" element={<MyReports />} />
+            <Route path="/profile" element={<Profile />} />
+          </Route>
 
         </Route>
 
@@ -152,10 +147,8 @@ function App() {
             ADMINISTRATION PORTAL
         ==================================================== */}
 
-        <Route
-          path="/admin"
-          element={<AdminLayout />}
-        >
+        <Route element={<RequireAuth role="admin" />}>
+          <Route path="/admin" element={<AdminLayout />}>
 
           {/* Dashboard
               URL: /admin
@@ -248,6 +241,7 @@ function App() {
             element={<AdminSettings />}
           />
 
+          </Route>
         </Route>
 
         {/* ====================================================

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 
-import { getReportByReference } from '../services/reportService'
+import { getReportByReferenceConnected } from '../services/reportService'
 
 import type {
   Report,
@@ -88,31 +88,25 @@ function Track() {
 
   useEffect(() => {
     if (!referenceFromUrl.trim()) {
-      setReport(null)
-      setError('')
       return
     }
 
     const cleanedReference =
       referenceFromUrl.trim().toUpperCase()
 
-    setReference(cleanedReference)
-
-    const storedReport =
-      getReportByReference(cleanedReference)
-
-    if (!storedReport) {
-      setReport(null)
-
-      setError(
-        'We could not find a report with that tracking reference. Please check the reference and try again.',
-      )
-
-      return
+    let cancelled = false
+    void getReportByReferenceConnected(cleanedReference)
+      .then((storedReport) => {
+        if (cancelled) return
+        setReport(storedReport ?? null)
+        setError(storedReport ? '' : 'We could not find a report with that tracking reference. Please check the reference and try again.')
+      })
+      .catch(() => {
+        if (!cancelled) setError('We could not connect to the report service. Please try again.')
+      })
+    return () => {
+      cancelled = true
     }
-
-    setReport(storedReport)
-    setError('')
   }, [referenceFromUrl])
 
   /*
@@ -142,27 +136,18 @@ function Track() {
     setIsSearching(true)
     setError('')
 
-    const storedReport =
-      getReportByReference(cleanedReference)
-
-    if (!storedReport) {
-      setReport(null)
-
-      setError(
-        'We could not find a report with that tracking reference. Please check the reference and try again.',
-      )
-
-      setIsSearching(false)
-      return
-    }
-
-    setReport(storedReport)
-
-    setSearchParams({
-      reference: cleanedReference,
-    })
-
-    setIsSearching(false)
+    getReportByReferenceConnected(cleanedReference)
+      .then((storedReport) => {
+        if (!storedReport) {
+          setReport(null)
+          setError('We could not find a report with that tracking reference. Please check the reference and try again.')
+          return
+        }
+        setReport(storedReport)
+        setSearchParams({ reference: cleanedReference })
+      })
+      .catch(() => setError('We could not connect to the report service. Please try again.'))
+      .finally(() => setIsSearching(false))
   }
 
   /*
