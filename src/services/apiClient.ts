@@ -1,7 +1,6 @@
 import type { Report } from '../types/report'
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://reporthub.iceiy.com').replace(/\/$/, '')
-
+const API_BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://reporthub.iceiy.com/api').replace(/\/$/, '')
 type ApiResponse<T> = { data?: T; error?: string; message?: string }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
