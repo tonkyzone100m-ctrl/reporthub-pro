@@ -1,6 +1,7 @@
 import type { Report } from '../types/report'
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://reporthub.iceiy.com/api').replace(/\/$/, '')
+
 type ApiResponse<T> = { data?: T; error?: string; message?: string }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -9,9 +10,12 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const token = localStorage.getItem('reporthub_token')
   if (token) headers.set('Authorization', `Bearer ${token}`)
 
+  const fullUrl = `${API_BASE_URL}${path}`
+  console.log('REQUESTING URL:', fullUrl) // <--- This will print the exact URL in your browser console
+
   let response: Response
   try {
-    response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers })
+    response = await fetch(fullUrl, { ...options, headers })
   } catch {
     throw new Error(`The ReportHub API is unavailable at ${API_BASE_URL}. Please check your connection or backend status.`)
   }
