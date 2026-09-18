@@ -6,18 +6,6 @@ ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
 
-// --- CORS HEADERS ---
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-
-// Handle browser preflight OPTIONS requests immediately
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
-// -------------------------------------------------------------------
-
 require __DIR__ . '/bootstrap.php';
 require __DIR__ . '/db.php';
 
@@ -56,11 +44,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_GET['action'] ?? '') === 'login'
     $statement = database()->prepare('SELECT id, name, email, role, password_hash FROM users WHERE email = :email LIMIT 1');
     $statement->execute(['email' => $email]);
     $user = $statement->fetch();
+    
     if (!$user || !password_verify((string) $payload['password'], $user['password_hash'])) {
         json_response(['error' => 'Invalid email or password.'], 401);
     }
+    
+    $userId = (int) $user['id'];
+    // Generate token matching bootstrap.php expected format: reporthub-{id}-{token}
+    $token = 'reporthub-' . $userId . '-' . bin2hex(random_bytes(16));
+    
     unset($user['password_hash']);
-    json_response(['data' => $user]);
+    
+    // Return user data along with the generated token
+    json_response([
+        'data' => [
+            'user' => $user,
+            'token' => $token
+        ]
+    ]);
 }
 
 json_response(['error' => 'Unsupported authentication action.'], 400);
