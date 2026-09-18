@@ -1,6 +1,18 @@
 <?php
 declare(strict_types=1);
 
+// --- CORS HEADERS (Required for Vercel -> AeonFree communication) ---
+header("Access-Control-Allow-Origin: *"); // Or replace '*' with your exact Vercel frontend URL for better security
+header("Access-Control-Allow-Methods: GET, POST, PATCH, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+// Handle browser preflight OPTIONS requests immediately
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+// -------------------------------------------------------------------
+
 require __DIR__ . '/bootstrap.php';
 require __DIR__ . '/db.php';
 
@@ -124,8 +136,8 @@ function format_report(array $report): array
             'name' => $report['reporter_name'] ?? 'Anonymous Reporter',
             'email' => $report['reporter_email'] ?? '',
         ],
-        'department' => $report['department'],
-        'assignedTo' => $report['assigned_to'],
+        'department' => $report['department'] ?? null,
+        'assignedTo' => $report['assigned_to'] ?? null,
         'evidence' => $report['evidence_name'] ? [$report['evidence_name']] : [],
         'evidenceName' => $report['evidence_name'],
         'administrativeNote' => $report['administrative_note'] ?? '',

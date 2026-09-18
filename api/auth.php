@@ -1,6 +1,23 @@
 <?php
 declare(strict_types=1);
 
+// Enable error reporting to see the real error instead of a generic 403
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
+
+// --- CORS HEADERS ---
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+// Handle browser preflight OPTIONS requests immediately
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+// -------------------------------------------------------------------
+
 require __DIR__ . '/bootstrap.php';
 require __DIR__ . '/db.php';
 
