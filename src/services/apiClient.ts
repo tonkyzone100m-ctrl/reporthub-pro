@@ -1,7 +1,8 @@
 import type { Report } from '../types/report'
 
 // CORRECT: Clean plain URL string
-const API_BASE_URL = 'https://reporthub.iceiy.com/api'
+// New (ifree.page)
+const API_BASE_URL = 'https://reporthub.ifree.page/api';
 type ApiResponse<T> = { data?: T; error?: string; message?: string }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
