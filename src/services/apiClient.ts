@@ -1,7 +1,5 @@
 import type { Report } from '../types/report'
 
-// CORRECT: Clean plain URL string
-// New (ifree.page)
 const API_BASE_URL = 'https://reporthub.ifree.page/api';
 type ApiResponse<T> = { data?: T; error?: string; message?: string }
 
@@ -12,7 +10,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   if (token) headers.set('Authorization', `Bearer ${token}`)
 
   const fullUrl = `${API_BASE_URL}${path}`
-  console.log('REQUESTING URL:', fullUrl) // <--- This will print the exact URL in your browser console
+  console.log('REQUESTING URL:', fullUrl)
 
   let response: Response
   try {
@@ -79,11 +77,28 @@ export function createReportFromApi(report: CreateReportRequest): Promise<{ refe
   })
 }
 
-export function loginWithApi(email: string, password: string) {
-  return request<{ id: number; name: string; email: string; role: 'citizen' | 'admin' }>('/auth.php?action=login', {
+export type AuthUser = {
+  id: number
+  name: string
+  email: string
+  role: 'citizen' | 'admin'
+}
+
+export async function loginWithApi(email: string, password: string): Promise<AuthUser> {
+  // PHP returns { data: { user, token } }. The request wrapper unpacks outer 'data'.
+  const result = await request<{ user: AuthUser; token: string }>('/auth.php?action=login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   })
+
+  if (!result || !result.user || !result.token) {
+    throw new Error('Invalid login response from server.')
+  }
+
+  // Save the authentic token issued by the PHP backend
+  localStorage.setItem('reporthub_token', result.token)
+
+  return result.user
 }
 
 export function registerWithApi(name: string, email: string, password: string): Promise<null> {
