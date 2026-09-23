@@ -4,7 +4,10 @@ declare(strict_types=1);
 $config = require __DIR__ . '/config.php';
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
-if ($origin !== '' && in_array($origin, $config['cors_origins'], true)) {
+// Automatically allow any Vercel preview/production deployment URL (.vercel.app)
+$isVercel = preg_match('/\.vercel\.app$/i', $origin);
+
+if ($origin !== '' && ($isVercel || in_array($origin, $config['cors_origins'], true))) {
     header("Access-Control-Allow-Origin: {$origin}");
     header('Access-Control-Allow-Credentials: true');
     header('Vary: Origin');
